@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         password = (EditText) findViewById(R.id.PassID);
         login = (Button) findViewById(R.id.btnLogin);
     }
-    public void lauchEmailList(View view){
+    public void launchEmailList(View view){
         Intent i = new Intent(this, EmailList.class);
         String nname = name.getText().toString();
         String uname = email.getText().toString();
