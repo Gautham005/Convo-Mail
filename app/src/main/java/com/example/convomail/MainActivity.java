@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.view.View;
 import android.content.Context;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     public static android.content.SharedPreferences SharedPreferences = null;
@@ -25,6 +26,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Intent i = getIntent();
+        if(i.getStringExtra("Auth")!=null){
+            AuthError();
+        }
         name = (EditText) findViewById(R.id.NameID);
         email = (EditText) findViewById(R.id.EmailID);
         password = (EditText) findViewById(R.id.PassID);
@@ -39,5 +44,11 @@ public class MainActivity extends AppCompatActivity {
         i.putExtra("username", uname);
         i.putExtra("pass", pass);
         startActivity(i);
+    }
+    public void AuthError(){
+        Toast t = Toast.makeText(getApplicationContext(), "Invalid Credentials", Toast.LENGTH_LONG);
+        for(int i=0;i<5;i++){
+            t.show();
+        }
     }
 }
