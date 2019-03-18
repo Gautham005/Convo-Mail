@@ -9,8 +9,10 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -30,6 +32,8 @@ public class SentMailActivity extends Activity {
     Intent newIntent;
     private ListView list;
     private ArrayAdapter<String> adapter=null;
+    private ProgressBar spinner;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +42,7 @@ public class SentMailActivity extends Activity {
         String password = newIntent.getStringExtra("password");
         String username = newIntent.getStringExtra("username");
         String name = newIntent.getStringExtra("name");
+        spinner = (ProgressBar)findViewById(R.id.progressBar1);
 
         user = new User(username, password, name);
         connectServer(user);
@@ -205,13 +210,15 @@ public class SentMailActivity extends Activity {
 //            progDailog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 //            progDailog.setCancelable(true);
 //            progDailog.show();
-            progressDialog = ProgressDialog.show(this.context,"Retrieving messages","Please wait...",false,false);
+//            progressDialog = ProgressDialog.show(this.context,"Retrieving messages","Please wait...",false,false);
+            spinner.setVisibility(View.VISIBLE);
 
         }
 
         protected  void onPostExecute(Inbox inbox) {
 
-            progressDialog.dismiss();
+//            progressDialog.dismiss();
+            spinner.setVisibility(View.GONE);
 
             setInbox(inbox);
         }

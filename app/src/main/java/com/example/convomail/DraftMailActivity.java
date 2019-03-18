@@ -9,8 +9,10 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -30,6 +32,8 @@ public class DraftMailActivity extends Activity {
     Intent newIntent;
     private ListView list;
     private ArrayAdapter<String> adapter=null;
+    private ProgressBar spinner;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,10 +42,12 @@ public class DraftMailActivity extends Activity {
         String password = newIntent.getStringExtra("password");
         String username = newIntent.getStringExtra("username");
         String name = newIntent.getStringExtra("name");
+        spinner = (ProgressBar)findViewById(R.id.progressBar1);
 
         user = new User(username, password, name);
         connectServer(user);
     }
+
     public  void connectServer(User user) {
         try {
 
@@ -56,13 +62,13 @@ public class DraftMailActivity extends Activity {
         try{
             header.clear();
             String tempDate, tempSubject, tempHeader, tempFrom;
-            for (int i = 0; i < inbox.getPrimary().getMessages().size(); i++) {
+            for (int i = 0; i < inbox.getDraft().getMessages().size(); i++) {
                 tempDate = "";
                 tempSubject = "";
                 tempHeader = "";
-                tempDate = inbox.getPrimary().getMessages().get(i).getSentDate().toString();
-                tempSubject = inbox.getPrimary().getMessages().get(i).getSubject().toString();
-                tempFrom = inbox.getPrimary().getMessages().get(i).getFrom()[0].toString();
+                tempDate = inbox.getDraft().getMessages().get(i).getSentDate().toString();
+                tempSubject = inbox.getDraft().getMessages().get(i).getSubject().toString();
+                tempFrom = inbox.getDraft().getMessages().get(i).getFrom()[0].toString();
                 tempHeader = tempDate + "\n" + tempSubject + "\n" + tempFrom;
                 Log.d("header", tempHeader);
 
@@ -176,7 +182,7 @@ public class DraftMailActivity extends Activity {
                 for(Message j : messages){
                     m.add(j);
                 }
-                inbox.setPrimary(new Mail(m));
+                inbox.setDraft(new Mail(m));
                 if(emailFolder!=null){
                     emailFolder.close(false);
                 }
@@ -205,13 +211,15 @@ public class DraftMailActivity extends Activity {
 //            progDailog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 //            progDailog.setCancelable(true);
 //            progDailog.show();
-            progressDialog = ProgressDialog.show(this.context,"Retrieving messages","Please wait...",false,false);
+//            progressDialog = ProgressDialog.show(this.context,"Retrieving messages","Please wait...",false,false);
+            spinner.setVisibility(View.VISIBLE);
 
         }
 
         protected  void onPostExecute(Inbox inbox) {
 
-            progressDialog.dismiss();
+//            progressDialog.dismiss();
+            spinner.setVisibility(View.GONE);
 
             setInbox(inbox);
         }
