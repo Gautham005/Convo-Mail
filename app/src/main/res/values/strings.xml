@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ConvoMail</string>
+    <string name="remember_me">Remember me</string>
 </resources>
