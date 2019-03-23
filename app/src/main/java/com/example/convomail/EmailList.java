@@ -153,6 +153,9 @@ public class EmailList extends TabActivity {
 //            }
 //        });
     }
+    public void onBackPressed() {
+        finish();
+    }
 //    protected void onActivityResult(int a, int b, Intent intent){
 //        this.finish();
 //    }

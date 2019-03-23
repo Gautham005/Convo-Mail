@@ -78,7 +78,7 @@ public class DraftMailActivity extends Activity {
 //            Log.d("size", h.get(0));
             user.setInbox(inbox);
 //            user.saveData(this);
-            Log.d("user", user.getInbox().primary.getMessages().get(0).getSubject());
+            Log.d("user", user.getInbox().draft.getMessages().get(0).getSubject());
             adapter = new ArrayAdapter<String>(this, R.layout.dataview, R.id.TextView ,header);
             list = (ListView) this.findViewById(R.id.DraftList);
             list.setAdapter(adapter);
