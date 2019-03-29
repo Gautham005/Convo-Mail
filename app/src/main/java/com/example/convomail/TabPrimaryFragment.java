@@ -1,15 +1,19 @@
 package com.example.convomail;
 
-import android.app.Activity;
-import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -24,10 +28,10 @@ import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Store;
-import android.content.SharedPreferences;
 
+import static android.content.Context.MODE_PRIVATE;
 
-public class PrimaryMailActivity extends Activity {
+public class TabPrimaryFragment extends Fragment {
     static ArrayList<String> header = new ArrayList<String>();
     String body = "";
     private User user;
@@ -35,29 +39,48 @@ public class PrimaryMailActivity extends Activity {
     private ListView list;
     private ArrayAdapter<String> adapter=null;
     private ProgressBar spinner;
+    public static final String PREFS_NAME = "myPrefsFile";
+
+    public SharedPreferences SharedPreferences;
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_primary_mail_list);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootview = inflater.inflate(R.layout.fragment_primary, container, false);
+        list = rootview.findViewById(R.id.PrimaryList);
+        ArrayList<String> s = getArguments().getStringArrayList("auth");
+        Log.d("nnn", s.get(1));
+        user = new User(s.get(1), s.get(2), s.get(0));
+        spinner = rootview.findViewById(R.id.progressBar1);
+        setHasOptionsMenu(true);
 
+        connectServer(user);
+        setRetainInstance(true);
 
-
-
-//        newIntent = getIntent();
-//        String password = newIntent.getStringExtra("password");
-//        String username = newIntent.getStringExtra("username");
-//        String name = newIntent.getStringExtra("name");
-//        spinner = (ProgressBar)findViewById(R.id.progressBar1);
-//
-//        user = new User(username, password, name);
-//        connectServer(user);
+        return rootview;
 
     }
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater){
+        menuInflater.inflate(R.menu.menuitems, menu);
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem){
+        SharedPreferences = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = SharedPreferences.edit();
+
+        if(menuItem.getItemId()==R.id.sign_out){
+            editor.remove("name");
+            editor.apply();
+            startActivity(new Intent(getContext(), MainActivity.class));
+        }
+        return super.onOptionsItemSelected(menuItem);
+    }
+
     public  void connectServer(User user) {
         try {
+            Log.d("nnn", "rm");
+            new RetrieveMessages(getContext()).execute(user.getUserID(), user.getPassword());
+            Log.d("nnn", "rm");
 
-
-            new RetrieveMessages(this).execute(user.getUserID(), user.getPassword());
         }
         catch(Exception e){}
 
@@ -83,9 +106,8 @@ public class PrimaryMailActivity extends Activity {
 //            Log.d("size", h.get(0));
             user.setInbox(inbox);
 //            user.saveData(this);
-            Log.d("user", user.getInbox().primary.getMessages().get(0).getSubject());
-            adapter = new ArrayAdapter<String>(this, R.layout.dataview, R.id.TextView ,header);
-            list = (ListView) this.findViewById(R.id.PrimaryList);
+            adapter = new ArrayAdapter<String>(getContext(), R.layout.dataview, R.id.TextView ,header);
+            list = (ListView) getView().findViewById(R.id.PrimaryList);
             list.setAdapter(adapter);
         }
         catch (Exception e){
@@ -150,6 +172,7 @@ public class PrimaryMailActivity extends Activity {
 
                 Session emailSession = Session.getDefaultInstance(properties);
                 // emailSession.setDebug(true);
+                Log.d("nnn", "ss");
 
                 // create the POP3 store object and connect with the pop server
                 Store store = emailSession.getStore("imaps");
@@ -212,6 +235,7 @@ public class PrimaryMailActivity extends Activity {
         protected void onPreExecute() {
             super.onPreExecute();
 //            progressDialog = ProgressDialog.show(this.context,"Retrieving messages","Please wait...",false,false);
+
             spinner.setVisibility(View.VISIBLE);
         }
 
@@ -223,5 +247,4 @@ public class PrimaryMailActivity extends Activity {
 
         }
     }
-
 }

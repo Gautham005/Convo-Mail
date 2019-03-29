@@ -1,32 +1,22 @@
 package com.example.convomail;
 
+import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.app.TabActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.TabHost;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.Vector;
 
-import javax.mail.Folder;
-import javax.mail.Message;
-import javax.mail.Session;
-import javax.mail.Store;
-import android.widget.TabHost;
-import android.widget.TabHost.TabSpec;
 
-public class EmailList extends TabActivity {
+public class EmailList extends AppCompatActivity {
 
     Intent newIntent;
     User user;
@@ -35,71 +25,52 @@ public class EmailList extends TabActivity {
     private static final String TRASH_SPEC = "Trash";
     private static final String SENT_MAIL_SPEC = "SentMail";
     private static final String SPAM_SPEC = "Spam";
-
+    private TabAdapter adapter;
+    private TabLayout tabLayout;
+    private ViewPager viewPager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_email_list);
+        Toolbar t = findViewById(R.id.tool_bar);
+        Log.d("ddd", t.toString());
+        setSupportActionBar(t);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         newIntent = getIntent();
         String password = newIntent.getStringExtra("pass");
         String username = newIntent.getStringExtra("username");
         String name = newIntent.getStringExtra("Name");
 
+        ArrayList<String> s = new ArrayList<>();
+        s.add(name);
+        s.add(username);
+        s.add(password);
         user = new User(username, password, name);
-        TabHost tabHost = getTabHost();
-        // Primary Tab
-        TabSpec primarySpec = tabHost.newTabSpec(PRIMARY_SPEC);
-        Intent primaryIntent = new Intent(this, PrimaryMailActivity.class);
-        primaryIntent.putExtra("username", username);
-        primaryIntent.putExtra("password", password);
-        primaryIntent.putExtra("name", name);
-        // Tab Content
-        primarySpec.setContent(primaryIntent);
-        primarySpec.setIndicator(PRIMARY_SPEC);
-        // Sent Mail Tab
-        TabSpec SentMailSpec = tabHost.newTabSpec(SENT_MAIL_SPEC);
-        Intent SentMailIntent = new Intent(this, SentMailActivity.class);
-        // Tab Content
-        SentMailSpec.setIndicator(SENT_MAIL_SPEC);
-        SentMailSpec.setContent(SentMailIntent);
-        SentMailIntent.putExtra("username", username);
-        SentMailIntent.putExtra("password", password);
-        SentMailIntent.putExtra("name", name);
-        //Draft Tab
-        TabSpec  DraftSpec = tabHost.newTabSpec(DRAFT_SPEC);
-        //Tab content
-        Intent DraftIntent = new Intent(this, DraftMailActivity.class);
-        DraftSpec.setContent(DraftIntent);
-        DraftSpec.setIndicator(DRAFT_SPEC);
-        DraftIntent.putExtra("username", username);
-        DraftIntent.putExtra("password", password);
-        DraftIntent.putExtra("name", name);
-        //Spam Tab
-        TabSpec  SpamSpec = tabHost.newTabSpec(SPAM_SPEC);
-        //Tab content
-        SpamSpec.setIndicator(SPAM_SPEC);
-        Intent SpamIntent = new Intent(this, SpamMailActivity.class);
-        SpamSpec.setContent(SpamIntent);
-        SpamIntent.putExtra("username", username);
-        SpamIntent.putExtra("password", password);
-        SpamIntent.putExtra("name", name);
-        //Trash Tab
-        TabSpec  TrashSpec = tabHost.newTabSpec(TRASH_SPEC);
-        TrashSpec.setIndicator(TRASH_SPEC);
-        //Tab content
-        Intent TrashIntent = new Intent(this, TrashActivity.class);
-        TrashSpec.setContent(TrashIntent);
-        TrashIntent.putExtra("username", username);
-        TrashIntent.putExtra("password", password);
-        TrashIntent.putExtra("name", name);
-        // Adding all TabSpec to TabHost
-        tabHost.addTab(primarySpec); // Adding Primary tab
-        tabHost.addTab(SentMailSpec); // Adding SentMail tab
-        tabHost.addTab(DraftSpec); // Adding Draft tab
-        tabHost.addTab(SpamSpec); // Adding Spam tab
-        tabHost.addTab(TrashSpec); // Adding Trash tab
+        Bundle b = new Bundle();
+        b.putStringArrayList("auth",s);
+        TabPrimaryFragment tp = new TabPrimaryFragment();
+        TabSentMailFragment tsm = new TabSentMailFragment();
+        TabDraftFragment td = new TabDraftFragment();
+        TabSpamFragment tsp = new TabSpamFragment();
+        TabTrashFragment tt = new TabTrashFragment();
+        tp.setArguments(b);
+        tsm.setArguments(b);
+        td.setArguments(b);
+        tsp.setArguments(b);
+        tt.setArguments(b);
+        setContentView(R.layout.activity_email_list);
 
-
+        viewPager = (ViewPager) findViewById(R.id.viewPager);
+        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        adapter = new TabAdapter(getSupportFragmentManager());
+        adapter.addFragment(tp, "Primary");
+        adapter.addFragment(tsm, "Sent Mail");
+        adapter.addFragment(td, "Draft");
+        adapter.addFragment(tsp, "Spam");
+        adapter.addFragment(tt, "Trash");
+        viewPager.setOffscreenPageLimit(5);
+        viewPager.setAdapter(adapter);
+        tabLayout.setupWithViewPager(viewPager);
 
 
 //        user.loadData(this);
@@ -152,6 +123,11 @@ public class EmailList extends TabActivity {
 //                }
 //            }
 //        });
+    }
+    public void onTabSelected(TabLayout.Tab tab, FragmentTransaction ft) {
+        // on tab selected
+        // show respected fragment view
+        viewPager.setCurrentItem(tab.getPosition());
     }
     public void onBackPressed() {
         finish();

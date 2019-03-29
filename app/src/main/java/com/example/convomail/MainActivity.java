@@ -15,7 +15,6 @@ import android.content.Context;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String PREFER_NAME = null;
     public static final String PREFS_NAME = "myPrefsFile";
     public SharedPreferences SharedPreferences ;
 
@@ -73,8 +72,7 @@ public class MainActivity extends AppCompatActivity {
     }
     public void AuthError(){
         Toast t = Toast.makeText(getApplicationContext(), "Invalid Credentials", Toast.LENGTH_LONG);
-        for(int i=0;i<5;i++){
-            t.show();
-        }
+        t.show();
+
     }
 }
