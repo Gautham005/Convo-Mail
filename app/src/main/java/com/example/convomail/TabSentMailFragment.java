@@ -1,15 +1,19 @@
 package com.example.convomail;
 
-import android.app.Activity;
-import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -17,6 +21,7 @@ import android.widget.ProgressBar;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Properties;
 
 import javax.mail.AuthenticationFailedException;
@@ -25,7 +30,9 @@ import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Store;
 
-public class DraftMailActivity extends Activity {
+import static android.content.Context.MODE_PRIVATE;
+
+public class TabSentMailFragment extends Fragment {
     static ArrayList<String> header = new ArrayList<String>();
     String body = "";
     private User user;
@@ -33,26 +40,31 @@ public class DraftMailActivity extends Activity {
     private ListView list;
     private ArrayAdapter<String> adapter=null;
     private ProgressBar spinner;
+    public static final String PREFS_NAME = "myPrefsFile";
+    private String[] month = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
+    public SharedPreferences SharedPreferences;
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_draft_mail_list);
-        newIntent = getIntent();
-        String password = newIntent.getStringExtra("password");
-        String username = newIntent.getStringExtra("username");
-        String name = newIntent.getStringExtra("name");
-        spinner = (ProgressBar)findViewById(R.id.progressBar1);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootview = inflater.inflate(R.layout.fragment_sentmail, container, false);
+        list = rootview.findViewById(R.id.SentMailList);
+        ArrayList<String> s = getArguments().getStringArrayList("auth");
+        Log.d("sm", s.get(1));
+        user = new User(s.get(1), s.get(2), s.get(0));
+        spinner = rootview.findViewById(R.id.progressBar1);
+        setHasOptionsMenu(true);
 
-        user = new User(username, password, name);
+        setRetainInstance(true);
         connectServer(user);
+
+        return rootview;
     }
+
 
     public  void connectServer(User user) {
         try {
-
-
-            new RetrieveMessages(this).execute(user.getUserID(), user.getPassword());
+            Log.d("sss","s");
+            new RetrieveMessages(getContext()).execute(user.getUserID(), user.getPassword());
         }
         catch(Exception e){}
 
@@ -61,16 +73,18 @@ public class DraftMailActivity extends Activity {
     public void setInbox(Inbox inbox){
         try{
             header.clear();
-            String tempDate, tempSubject, tempHeader, tempFrom;
-            for (int i = 0; i < inbox.getDraft().getMessages().size(); i++) {
-                tempDate = "";
+            Date tempDate;
+            String  tempSubject, tempHeader, tempFrom;
+            for (int i = 0; i < inbox.getSentMail().getMessages().size(); i++) {
+                tempDate = null;
                 tempSubject = "";
                 tempHeader = "";
-                tempDate = inbox.getDraft().getMessages().get(i).getSentDate().toString();
-                tempSubject = inbox.getDraft().getMessages().get(i).getSubject().toString();
-                tempFrom = inbox.getDraft().getMessages().get(i).getFrom()[0].toString();
-                tempHeader = tempDate + "\n" + tempSubject + "\n" + tempFrom;
+                tempDate = inbox.getSentMail().getMessages().get(i).getDate();
+                tempSubject = inbox.getSentMail().getMessages().get(i).getSubject().toString();
+                tempFrom = inbox.getSentMail().getMessages().get(i).getFromAddress()[0].toString();
+                tempHeader = tempFrom + "\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + month[tempDate.getMonth()]+ " " +  tempDate.getDate() +" "+ (tempDate.getYear()+1900)+ "\n\n" + tempSubject;
                 Log.d("header", tempHeader);
+
 
                 System.out.print(tempHeader);
                 header.add(tempHeader);
@@ -78,13 +92,13 @@ public class DraftMailActivity extends Activity {
 //            Log.d("size", h.get(0));
             user.setInbox(inbox);
 //            user.saveData(this);
-            Log.d("user", user.getInbox().draft.getMessages().get(0).getSubject());
-            adapter = new ArrayAdapter<String>(this, R.layout.dataview, R.id.TextView ,header);
-            list = (ListView) this.findViewById(R.id.DraftList);
+            list = (ListView) getView().findViewById(R.id.SentMailList);
+
+            adapter = new ArrayAdapter<String>(getContext(), R.layout.dataview, R.id.TextView ,header);
             list.setAdapter(adapter);
         }
         catch (Exception e){
-            Log.d("Error", e.toString());
+            Log.d("sError", e.toString());
         }
 
 
@@ -105,6 +119,17 @@ public class DraftMailActivity extends Activity {
                 return "smtp.office365.com";
             }
             return "";
+        }
+        Message[] reverse(Message a[], int n)
+        {
+            Message[] b = new Message[n];
+            int j = n;
+            for (int i = 0; i < n; i++) {
+                b[j - 1] = a[i];
+                j = j - 1;
+            }
+
+            return b;
         }
         private Properties getProp(String user){
             String[] s = user.split("@");
@@ -128,16 +153,16 @@ public class DraftMailActivity extends Activity {
             String[] s = user.split("@");
 
             if(s[1].equals("gmail.com")){
-                return "[Gmail]/Drafts";
+                return "[Gmail]/Sent Mail";
             }
             else if(s[1].equals("outlook.com")){
-                return "Drafts" ;
+                return "Sent" ;
             }
             return "";
         }
         @Override
         protected Inbox doInBackground(String... strings) {
-            Inbox inbox = new Inbox(new Mail(new ArrayList<Message>()), new Mail(new ArrayList<Message>()), new Mail(new ArrayList<Message>()), new Mail(new ArrayList<Message>()));
+            Inbox inbox = new Inbox(new Mail(new ArrayList<com.example.convomail.Message>()), new Mail(new ArrayList<com.example.convomail.Message>()), new Mail(new ArrayList<com.example.convomail.Message>()), new Mail(new ArrayList<com.example.convomail.Message>()));
             try{
                 // create properties field
                 String host = this.getHost(strings[0]);
@@ -179,10 +204,9 @@ public class DraftMailActivity extends Activity {
                     header.add(tempHeader);
                 }
                 ArrayList<Message> m = new ArrayList<Message>();
-                for(Message j : messages){
-                    m.add(j);
-                }
-                inbox.setDraft(new Mail(m));
+                messages = reverse(messages, messages.length);
+
+                inbox.setSentMail(messages);
                 if(emailFolder!=null){
                     emailFolder.close(false);
                 }
@@ -191,11 +215,7 @@ public class DraftMailActivity extends Activity {
                 }
 
             }
-            catch (AuthenticationFailedException e){
-                Intent i = new Intent(context, MainActivity.class);
-                i.putExtra("Auth", "autherror");
-                startActivity(i);
-            }
+
             catch (Exception e){
                 Log.d("err", e.toString()) ;
 
@@ -206,22 +226,16 @@ public class DraftMailActivity extends Activity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-//            progDailog.setMessage("Loading...");
-//            progDailog.setIndeterminate(false);
-//            progDailog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-//            progDailog.setCancelable(true);
-//            progDailog.show();
 //            progressDialog = ProgressDialog.show(this.context,"Retrieving messages","Please wait...",false,false);
             spinner.setVisibility(View.VISIBLE);
-
         }
 
         protected  void onPostExecute(Inbox inbox) {
 
 //            progressDialog.dismiss();
             spinner.setVisibility(View.GONE);
-
             setInbox(inbox);
+
         }
     }
 }

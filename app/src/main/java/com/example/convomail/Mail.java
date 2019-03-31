@@ -3,7 +3,6 @@ package com.example.convomail;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import javax.mail.Message;
 
 public class Mail implements Serializable {
     ArrayList<Message> Messages;

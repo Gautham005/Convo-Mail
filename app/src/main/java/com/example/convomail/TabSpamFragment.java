@@ -1,15 +1,19 @@
 package com.example.convomail;
 
-import android.app.Activity;
-import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -17,6 +21,7 @@ import android.widget.ProgressBar;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Properties;
 
 import javax.mail.AuthenticationFailedException;
@@ -25,7 +30,9 @@ import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Store;
 
-public class PrimaryMailActivity extends Activity {
+import static android.content.Context.MODE_PRIVATE;
+
+public class TabSpamFragment extends Fragment {
     static ArrayList<String> header = new ArrayList<String>();
     String body = "";
     private User user;
@@ -33,42 +40,50 @@ public class PrimaryMailActivity extends Activity {
     private ListView list;
     private ArrayAdapter<String> adapter=null;
     private ProgressBar spinner;
+    public static final String PREFS_NAME = "myPrefsFile";
+    private String[] month = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
+    public SharedPreferences SharedPreferences;
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_primary_mail_list);
-        newIntent = getIntent();
-        String password = newIntent.getStringExtra("password");
-        String username = newIntent.getStringExtra("username");
-        String name = newIntent.getStringExtra("name");
-        spinner = (ProgressBar)findViewById(R.id.progressBar1);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootview = inflater.inflate(R.layout.fragment_spam, container, false);
+        list = rootview.findViewById(R.id.SpamMailList);
+        ArrayList<String> s = getArguments().getStringArrayList("auth");
+        Log.d("sp", s.get(2));
+        user = new User(s.get(1), s.get(2), s.get(0));
+        spinner = rootview.findViewById(R.id.progressBar1);
+        setHasOptionsMenu(true);
 
-        user = new User(username, password, name);
         connectServer(user);
+        setRetainInstance(true);
 
+        return rootview;
     }
+
+
+
     public  void connectServer(User user) {
         try {
-
-
-            new RetrieveMessages(this).execute(user.getUserID(), user.getPassword());
+            new RetrieveMessages(getContext()).execute(user.getUserID(), user.getPassword());
         }
         catch(Exception e){}
 
 
     }
+
     public void setInbox(Inbox inbox){
         try{
             header.clear();
-            String tempDate, tempSubject, tempHeader, tempFrom;
-            for (int i = 0; i < inbox.getPrimary().getMessages().size(); i++) {
-                tempDate = "";
+            Date tempDate;
+            String  tempSubject, tempHeader, tempFrom;
+            for (int i = 0; i < inbox.getSpam().getMessages().size(); i++) {
+                tempDate = null;
                 tempSubject = "";
                 tempHeader = "";
-                tempDate = inbox.getPrimary().getMessages().get(i).getSentDate().toString();
-                tempSubject = inbox.getPrimary().getMessages().get(i).getSubject().toString();
-                tempFrom = inbox.getPrimary().getMessages().get(i).getFrom()[0].toString();
-                tempHeader = tempDate + "\n" + tempSubject + "\n" + tempFrom;
+                tempDate = inbox.getSpam().getMessages().get(i).getDate();
+                tempSubject = inbox.getSpam().getMessages().get(i).getSubject().toString();
+                tempFrom = inbox.getSpam().getMessages().get(i).getFromAddress()[0].toString();
+                tempHeader = tempFrom + "\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + month[tempDate.getMonth()]+ " " +  tempDate.getDate() +" "+ (tempDate.getYear()+1900)+ "\n\n" + tempSubject;
                 Log.d("header", tempHeader);
 
                 System.out.print(tempHeader);
@@ -77,9 +92,8 @@ public class PrimaryMailActivity extends Activity {
 //            Log.d("size", h.get(0));
             user.setInbox(inbox);
 //            user.saveData(this);
-            Log.d("user", user.getInbox().primary.getMessages().get(0).getSubject());
-            adapter = new ArrayAdapter<String>(this, R.layout.dataview, R.id.TextView ,header);
-            list = (ListView) this.findViewById(R.id.PrimaryList);
+            adapter = new ArrayAdapter<String>(getContext(), R.layout.dataview, R.id.TextView ,header);
+            list = (ListView) getView().findViewById(R.id.SpamMailList);
             list.setAdapter(adapter);
         }
         catch (Exception e){
@@ -105,6 +119,17 @@ public class PrimaryMailActivity extends Activity {
             }
             return "";
         }
+        Message[] reverse(Message a[], int n)
+        {
+            Message[] b = new Message[n];
+            int j = n;
+            for (int i = 0; i < n; i++) {
+                b[j - 1] = a[i];
+                j = j - 1;
+            }
+
+            return b;
+        }
         private Properties getProp(String user){
             String[] s = user.split("@");
             Properties properties = new Properties();
@@ -127,16 +152,16 @@ public class PrimaryMailActivity extends Activity {
             String[] s = user.split("@");
 
             if(s[1].equals("gmail.com")){
-                return "INBOX";
+                return "[Gmail]/Spam";
             }
             else if(s[1].equals("outlook.com")){
-                return "INBOX" ;
+                return "Junk" ;
             }
             return "";
         }
         @Override
         protected Inbox doInBackground(String... strings) {
-            Inbox inbox = new Inbox(new Mail(new ArrayList<Message>()), new Mail(new ArrayList<Message>()), new Mail(new ArrayList<Message>()), new Mail(new ArrayList<Message>()));
+            Inbox inbox = new Inbox(new Mail(new ArrayList<com.example.convomail.Message>()), new Mail(new ArrayList<com.example.convomail.Message>()), new Mail(new ArrayList<com.example.convomail.Message>()), new Mail(new ArrayList<com.example.convomail.Message>()));
             try{
                 // create properties field
                 String host = this.getHost(strings[0]);
@@ -177,11 +202,9 @@ public class PrimaryMailActivity extends Activity {
                     System.out.print(tempHeader);
                     header.add(tempHeader);
                 }
-                ArrayList<Message> m = new ArrayList<Message>();
-                for(Message j : messages){
-                    m.add(j);
-                }
-                inbox.setPrimary(new Mail(m));
+                messages = reverse(messages, messages.length);
+
+                inbox.setSpam(messages);
                 if(emailFolder!=null){
                     emailFolder.close(false);
                 }
@@ -190,11 +213,7 @@ public class PrimaryMailActivity extends Activity {
                 }
 
             }
-            catch (AuthenticationFailedException e){
-                Intent i = new Intent(context, MainActivity.class);
-                i.putExtra("Auth", "autherror");
-                startActivity(i);
-            }
+
             catch (Exception e){
                 Log.d("err", e.toString()) ;
 

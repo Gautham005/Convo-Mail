@@ -1,108 +1,114 @@
 package com.example.convomail;
 
+import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.app.TabActivity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.TabHost;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.Vector;
 
-import javax.mail.Folder;
-import javax.mail.Message;
-import javax.mail.Session;
-import javax.mail.Store;
-import android.widget.TabHost;
-import android.widget.TabHost.TabSpec;
+import static java.lang.System.exit;
 
-public class EmailList extends TabActivity {
+
+public class EmailList extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     Intent newIntent;
     User user;
-    private static final String PRIMARY_SPEC = "Primary";
-    private static final String DRAFT_SPEC = "Draft";
-    private static final String TRASH_SPEC = "Trash";
-    private static final String SENT_MAIL_SPEC = "SentMail";
-    private static final String SPAM_SPEC = "Spam";
 
+    private TabAdapter adapter;
+    private TabLayout tabLayout;
+    private ViewPager viewPager;
+    public static final String PREFS_NAME = "myPrefsFile";
+
+    public SharedPreferences SharedPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_email_list);
+//        Log.d("ddd", t.toString());
+//        setSupportActionBar(t);
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         newIntent = getIntent();
         String password = newIntent.getStringExtra("pass");
         String username = newIntent.getStringExtra("username");
         String name = newIntent.getStringExtra("Name");
 
+        ArrayList<String> s = new ArrayList<>();
+        s.add(name);
+        s.add(username);
+        s.add(password);
         user = new User(username, password, name);
-        TabHost tabHost = getTabHost();
-        // Primary Tab
-        TabSpec primarySpec = tabHost.newTabSpec(PRIMARY_SPEC);
-        Intent primaryIntent = new Intent(this, PrimaryMailActivity.class);
-        primaryIntent.putExtra("username", username);
-        primaryIntent.putExtra("password", password);
-        primaryIntent.putExtra("name", name);
-        // Tab Content
-        primarySpec.setContent(primaryIntent);
-        primarySpec.setIndicator(PRIMARY_SPEC);
-        // Sent Mail Tab
-        TabSpec SentMailSpec = tabHost.newTabSpec(SENT_MAIL_SPEC);
-        Intent SentMailIntent = new Intent(this, SentMailActivity.class);
-        // Tab Content
-        SentMailSpec.setIndicator(SENT_MAIL_SPEC);
-        SentMailSpec.setContent(SentMailIntent);
-        SentMailIntent.putExtra("username", username);
-        SentMailIntent.putExtra("password", password);
-        SentMailIntent.putExtra("name", name);
-        //Draft Tab
-        TabSpec  DraftSpec = tabHost.newTabSpec(DRAFT_SPEC);
-        //Tab content
-        Intent DraftIntent = new Intent(this, DraftMailActivity.class);
-        DraftSpec.setContent(DraftIntent);
-        DraftSpec.setIndicator(DRAFT_SPEC);
-        DraftIntent.putExtra("username", username);
-        DraftIntent.putExtra("password", password);
-        DraftIntent.putExtra("name", name);
-        //Spam Tab
-        TabSpec  SpamSpec = tabHost.newTabSpec(SPAM_SPEC);
-        //Tab content
-        SpamSpec.setIndicator(SPAM_SPEC);
-        Intent SpamIntent = new Intent(this, SpamMailActivity.class);
-        SpamSpec.setContent(SpamIntent);
-        SpamIntent.putExtra("username", username);
-        SpamIntent.putExtra("password", password);
-        SpamIntent.putExtra("name", name);
-        //Trash Tab
-        TabSpec  TrashSpec = tabHost.newTabSpec(TRASH_SPEC);
-        TrashSpec.setIndicator(TRASH_SPEC);
-        //Tab content
-        Intent TrashIntent = new Intent(this, TrashActivity.class);
-        TrashSpec.setContent(TrashIntent);
-        TrashIntent.putExtra("username", username);
-        TrashIntent.putExtra("password", password);
-        TrashIntent.putExtra("name", name);
-        // Adding all TabSpec to TabHost
-        tabHost.addTab(primarySpec); // Adding Primary tab
-        tabHost.addTab(SentMailSpec); // Adding SentMail tab
-        tabHost.addTab(DraftSpec); // Adding Draft tab
-        tabHost.addTab(SpamSpec); // Adding Spam tab
-        tabHost.addTab(TrashSpec); // Adding Trash tab
+        Bundle b = new Bundle();
+        b.putStringArrayList("auth",s);
+        TabPrimaryFragment tp = new TabPrimaryFragment();
+        TabSentMailFragment tsm = new TabSentMailFragment();
+        TabDraftFragment td = new TabDraftFragment();
+        TabSpamFragment tsp = new TabSpamFragment();
+        TabTrashFragment tt = new TabTrashFragment();
+        tp.setArguments(b);
+        tsm.setArguments(b);
+        td.setArguments(b);
+        tsp.setArguments(b);
+        tt.setArguments(b);
+        setContentView(R.layout.activity_email_list);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.tool_bar);
+        setSupportActionBar(toolbar);
 
+        viewPager = (ViewPager) findViewById(R.id.viewPager);
+        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        adapter = new TabAdapter(getSupportFragmentManager());
+        adapter.addFragment(tp, "Primary");
+        adapter.addFragment(tsm, "Sent Mail");
+        adapter.addFragment(td, "Draft");
+        adapter.addFragment(tsp, "Spam");
+        adapter.addFragment(tt, "Trash");
+        viewPager.setOffscreenPageLimit(5);
+        viewPager.setAdapter(adapter);
+        tabLayout.setupWithViewPager(viewPager);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Compose a new mail", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
 
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
 
-
-//        user.loadData(this);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        View header = navigationView.getHeaderView(0);
+        TextView uname = (TextView) header.findViewById(R.id.UserName);
+        TextView email = (TextView) header.findViewById(R.id.UserEmail);
+        uname.setText(name);
+        email.setText(username);
+        //        user.loadData(this);
 //
 //
 //        try {
@@ -153,8 +159,62 @@ public class EmailList extends TabActivity {
 //            }
 //        });
     }
+    public void onTabSelected(TabLayout.Tab tab, FragmentTransaction ft) {
+        // on tab selected
+        // show respected fragment view
+        viewPager.setCurrentItem(tab.getPosition());
+    }
+    @Override
     public void onBackPressed() {
-        finish();
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            Intent a = new Intent(Intent.ACTION_MAIN);
+            a.addCategory(Intent.CATEGORY_HOME);
+            a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(a);        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        SharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = SharedPreferences.edit();
+        int id = item.getItemId();
+
+        if (id == R.id.nav_sign_out) {
+            editor.remove("name");
+            editor.apply();
+            startActivity(new Intent(this, MainActivity.class));
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 //    protected void onActivityResult(int a, int b, Intent intent){
 //        this.finish();
