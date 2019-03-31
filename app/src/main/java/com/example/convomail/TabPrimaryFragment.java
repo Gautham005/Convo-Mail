@@ -9,17 +9,19 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
@@ -29,8 +31,6 @@ import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Store;
-
-import static android.content.Context.MODE_PRIVATE;
 
 public class TabPrimaryFragment extends Fragment {
     static ArrayList<String> header = new ArrayList<String>();
@@ -42,7 +42,7 @@ public class TabPrimaryFragment extends Fragment {
     private ProgressBar spinner;
     public static final String PREFS_NAME = "myPrefsFile";
     private String[] month = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-
+    public static String fileName;
     public SharedPreferences SharedPreferences;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -53,10 +53,48 @@ public class TabPrimaryFragment extends Fragment {
         user = new User(s.get(1), s.get(2), s.get(0));
         spinner = rootview.findViewById(R.id.progressBar1);
         setHasOptionsMenu(true);
+        fileName = user.getName()+"Primary";
+        try {
+            FileInputStream fis = getContext().openFileInput(fileName);
+            ObjectInputStream is = new ObjectInputStream(fis);
+            User user1 = (User) is.readObject();
+            is.close();
+            fis.close();
+            Inbox inbox = user1.getInbox();
+            Date tempDate;
+            String tempSubject, tempHeader, tempFrom;
+            for (int i = 0; i < inbox.getPrimary().getMessages().size(); i++) {
+                tempDate = null;
+                tempSubject = "";
+                tempHeader = "";
+                tempDate = inbox.getPrimary().getMessages().get(i).getDate();
 
-        connectServer(user);
-        setRetainInstance(true);
+                tempSubject = inbox.getPrimary().getMessages().get(i).getSubject().toString();
+                tempFrom = inbox.getPrimary().getMessages().get(i).getFromAddress()[0].toString();
+                tempHeader = tempFrom + "\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + month[tempDate.getMonth()]+ " " +  tempDate.getDate() +" "+ (tempDate.getYear()+1900)+ "\n\n" + tempSubject;
+                Log.d("header", tempHeader);
 
+                System.out.print(tempHeader);
+                header.add(tempHeader);
+            }
+            adapter = new ArrayAdapter<String>(getContext(), R.layout.dataview, R.id.TextView ,header);
+            list = (ListView) rootview.findViewById(R.id.PrimaryList);
+            list.setAdapter(adapter);
+            list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    Intent in = new Intent(getContext(), EmailDetailView.class);
+                    in.putExtra("file", fileName);
+                    in.putExtra("position", i);
+                    startActivity(in);
+                }
+            });
+            connectServer(user);
+            setRetainInstance(true);
+
+        }catch (Exception e){
+            Log.d("cac", e.toString());
+        }
         return rootview;
 
     }
@@ -81,10 +119,10 @@ public class TabPrimaryFragment extends Fragment {
                 tempDate = null;
                 tempSubject = "";
                 tempHeader = "";
-                tempDate = inbox.getPrimary().getMessages().get(i).getSentDate();
+                tempDate = inbox.getPrimary().getMessages().get(i).getDate();
 
                 tempSubject = inbox.getPrimary().getMessages().get(i).getSubject().toString();
-                tempFrom = inbox.getPrimary().getMessages().get(i).getFrom()[0].toString();
+                tempFrom = inbox.getPrimary().getMessages().get(i).getFromAddress()[0].toString();
                 tempHeader = tempFrom + "\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + month[tempDate.getMonth()]+ " " +  tempDate.getDate() +" "+ (tempDate.getYear()+1900)+ "\n\n" + tempSubject;
                 Log.d("header", tempHeader);
 
@@ -97,6 +135,20 @@ public class TabPrimaryFragment extends Fragment {
             adapter = new ArrayAdapter<String>(getContext(), R.layout.dataview, R.id.TextView ,header);
             list = (ListView) getView().findViewById(R.id.PrimaryList);
             list.setAdapter(adapter);
+            FileOutputStream fos = getContext().openFileOutput(fileName, Context.MODE_PRIVATE);
+            ObjectOutputStream os = new ObjectOutputStream(fos);
+            os.writeObject(user);
+            os.close();
+            fos.close();
+            list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    Intent in = new Intent(getContext(), EmailDetailView.class);
+                    in.putExtra("file", fileName);
+                    in.putExtra("position", i);
+                    startActivity(in);
+                }
+            });
         }
         catch (Exception e){
             Log.d("Error", e.toString());
@@ -163,7 +215,7 @@ public class TabPrimaryFragment extends Fragment {
         }
         @Override
         protected Inbox doInBackground(String... strings) {
-            Inbox inbox = new Inbox(new Mail(new ArrayList<Message>()), new Mail(new ArrayList<Message>()), new Mail(new ArrayList<Message>()), new Mail(new ArrayList<Message>()));
+            Inbox inbox = new Inbox(new Mail(new ArrayList<com.example.convomail.Message>()), new Mail(new ArrayList<com.example.convomail.Message>()), new Mail(new ArrayList<com.example.convomail.Message>()), new Mail(new ArrayList<com.example.convomail.Message>()));
             try{
                 // create properties field
                 String host = this.getHost(strings[0]);
@@ -207,10 +259,8 @@ public class TabPrimaryFragment extends Fragment {
                 }
                 ArrayList<Message> m = new ArrayList<Message>();
                 messages = reverse(messages, messages.length);
-                for(Message j : messages){
-                    m.add(j);
-                }
-                inbox.setPrimary(new Mail(m));
+
+                inbox.setPrimary(messages);
                 if(emailFolder!=null){
                     emailFolder.close(false);
                 }
@@ -236,13 +286,13 @@ public class TabPrimaryFragment extends Fragment {
             super.onPreExecute();
 //            progressDialog = ProgressDialog.show(this.context,"Retrieving messages","Please wait...",false,false);
 
-            spinner.setVisibility(View.VISIBLE);
+//            spinner.setVisibility(View.VISIBLE);
         }
 
         protected  void onPostExecute(Inbox inbox) {
 
 //            progressDialog.dismiss();
-            spinner.setVisibility(View.GONE);
+//            spinner.setVisibility(View.GONE);
             setInbox(inbox);
 
         }

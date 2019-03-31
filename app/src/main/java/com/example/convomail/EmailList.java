@@ -28,6 +28,8 @@ import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
+import static java.lang.System.exit;
+
 
 public class EmailList extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -168,8 +170,10 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
-        }
+            Intent a = new Intent(Intent.ACTION_MAIN);
+            a.addCategory(Intent.CATEGORY_HOME);
+            a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(a);        }
     }
 
     @Override

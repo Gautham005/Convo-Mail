@@ -14,17 +14,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SpamMailActivity"/>
-        <activity android:name=".TrashActivity" />
-        <activity android:name=".SentMailActivity" />
-        <activity android:name=".DraftMailActivity" />
-        <activity android:name=".PrimaryMailActivity" />
+        <activity
+            android:name=".EmailDetailView"
+            android:label="@string/title_activity_email_detail_view"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity android:name=".dataview" />
         <activity android:name=".BodyClass" />
-        <activity android:name=".EmailList"
-            android:theme="@style/MyToolbarTheme"/>
-        <activity android:name=".MainActivity"
-            >
+        <activity
+            android:name=".EmailList"
+            android:theme="@style/MyToolbarTheme" />
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

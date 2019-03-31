@@ -70,13 +70,13 @@ public class TabDraftFragment extends Fragment {
             header.clear();
             Date tempDate;
             String  tempSubject, tempHeader, tempFrom;
-            for (int i = 0; i < inbox.getPrimary().getMessages().size(); i++) {
+            for (int i = 0; i < inbox.getDraft().getMessages().size(); i++) {
                 tempDate = null;
                 tempSubject = "";
                 tempHeader = "";
-                tempDate = inbox.getPrimary().getMessages().get(i).getSentDate();
-                tempSubject = inbox.getPrimary().getMessages().get(i).getSubject().toString();
-                tempFrom = inbox.getPrimary().getMessages().get(i).getFrom()[0].toString();
+                tempDate = inbox.getDraft().getMessages().get(i).getDate();
+                tempSubject = inbox.getDraft().getMessages().get(i).getSubject().toString();
+                tempFrom = inbox.getDraft().getMessages().get(i).getFromAddress()[0].toString();
                 tempHeader = tempFrom + "\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + month[tempDate.getMonth()]+ " " +  tempDate.getDate() +" "+ (tempDate.getYear()+1900)+ "\n\n" + tempSubject;
                 Log.d("header", tempHeader);
 
@@ -155,7 +155,7 @@ public class TabDraftFragment extends Fragment {
         }
         @Override
         protected Inbox doInBackground(String... strings) {
-            Inbox inbox = new Inbox(new Mail(new ArrayList<Message>()), new Mail(new ArrayList<Message>()), new Mail(new ArrayList<Message>()), new Mail(new ArrayList<Message>()));
+            Inbox inbox = new Inbox(new Mail(new ArrayList<com.example.convomail.Message>()), new Mail(new ArrayList<com.example.convomail.Message>()), new Mail(new ArrayList<com.example.convomail.Message>()), new Mail(new ArrayList<com.example.convomail.Message>()));
             try{
                 // create properties field
                 String host = this.getHost(strings[0]);
@@ -198,11 +198,7 @@ public class TabDraftFragment extends Fragment {
                 }
                 messages = reverse(messages, messages.length);
 
-                ArrayList<Message> m = new ArrayList<Message>();
-                for(Message j : messages){
-                    m.add(j);
-                }
-                inbox.setPrimary(new Mail(m));
+                inbox.setDraft(messages);
                 if(emailFolder!=null){
                     emailFolder.close(false);
                 }
