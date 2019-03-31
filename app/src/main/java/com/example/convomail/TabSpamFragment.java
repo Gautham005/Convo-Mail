@@ -21,6 +21,7 @@ import android.widget.ProgressBar;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Properties;
 
 import javax.mail.AuthenticationFailedException;
@@ -40,6 +41,7 @@ public class TabSpamFragment extends Fragment {
     private ArrayAdapter<String> adapter=null;
     private ProgressBar spinner;
     public static final String PREFS_NAME = "myPrefsFile";
+    private String[] month = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
     public SharedPreferences SharedPreferences;
     @Override
@@ -68,34 +70,20 @@ public class TabSpamFragment extends Fragment {
 
 
     }
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater){
-        menuInflater.inflate(R.menu.menuitems, menu);
-    }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem menuItem){
-        SharedPreferences = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        SharedPreferences.Editor editor = SharedPreferences.edit();
 
-        if(menuItem.getItemId()==R.id.sign_out){
-            editor.remove("name");
-            editor.apply();
-            startActivity(new Intent(getContext(), MainActivity.class));
-        }
-        return true;
-    }
     public void setInbox(Inbox inbox){
         try{
             header.clear();
-            String tempDate, tempSubject, tempHeader, tempFrom;
+            Date tempDate;
+            String  tempSubject, tempHeader, tempFrom;
             for (int i = 0; i < inbox.getPrimary().getMessages().size(); i++) {
-                tempDate = "";
+                tempDate = null;
                 tempSubject = "";
                 tempHeader = "";
-                tempDate = inbox.getPrimary().getMessages().get(i).getSentDate().toString();
+                tempDate = inbox.getPrimary().getMessages().get(i).getSentDate();
                 tempSubject = inbox.getPrimary().getMessages().get(i).getSubject().toString();
                 tempFrom = inbox.getPrimary().getMessages().get(i).getFrom()[0].toString();
-                tempHeader = tempDate + "\n" + tempSubject + "\n" + tempFrom;
+                tempHeader = tempFrom + "\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + month[tempDate.getMonth()]+ " " +  tempDate.getDate() +" "+ (tempDate.getYear()+1900)+ "\n\n" + tempSubject;
                 Log.d("header", tempHeader);
 
                 System.out.print(tempHeader);
@@ -130,6 +118,17 @@ public class TabSpamFragment extends Fragment {
                 return "smtp.office365.com";
             }
             return "";
+        }
+        Message[] reverse(Message a[], int n)
+        {
+            Message[] b = new Message[n];
+            int j = n;
+            for (int i = 0; i < n; i++) {
+                b[j - 1] = a[i];
+                j = j - 1;
+            }
+
+            return b;
         }
         private Properties getProp(String user){
             String[] s = user.split("@");
@@ -203,6 +202,8 @@ public class TabSpamFragment extends Fragment {
                     System.out.print(tempHeader);
                     header.add(tempHeader);
                 }
+                messages = reverse(messages, messages.length);
+
                 ArrayList<Message> m = new ArrayList<Message>();
                 for(Message j : messages){
                     m.add(j);
