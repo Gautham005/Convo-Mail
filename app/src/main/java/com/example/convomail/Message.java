@@ -17,11 +17,15 @@ public class Message implements Serializable {
     String subject;
     String content;
     String contentType;
+    int msgno;
     Message(Address fromAddress[], Date d, String s, Object c, String contentType){
         this.fromAddress = fromAddress;
         this.date = d;
         this.contentType = contentType;
         this.subject = s;
+        if(s==null){
+            this.subject = "(No subject)";
+        }
         try{
             if(contentType == "text/plain"){
                 this.content = c.toString();
@@ -33,6 +37,18 @@ public class Message implements Serializable {
         }catch (Exception e){
             Log.d("ERr", e.toString());
         }
+    }
+    Message(Address fromAddress[], Date d, String s, int msgno, String contentType){
+        this.fromAddress = fromAddress;
+        this.date = d;
+        this.subject = s;
+        this.contentType = contentType;
+        this.msgno = msgno;if(s==null){
+            this.subject = "(No subject)";
+        }
+    }
+    int getMsgno(){
+        return msgno;
     }
     Address[] getFromAddress(){
         return fromAddress;

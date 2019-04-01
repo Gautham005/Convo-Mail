@@ -25,7 +25,7 @@ public class Inbox implements Serializable {
         try{
             ArrayList<Message> m = new ArrayList<>();
             for(javax.mail.Message j:message){
-                m.add(new Message(j.getFrom(), j.getReceivedDate(), j.getSubject(), j.getContent(), j.getContentType()));
+                m.add(new Message(j.getFrom(), j.getReceivedDate(), j.getSubject(), j.getMessageNumber(), j.getContentType()));
             }
             this.primary = new Mail(m);
         }catch (Exception e){
@@ -46,7 +46,7 @@ public class Inbox implements Serializable {
             try{
                 ArrayList<Message> m = new ArrayList<>();
                 for(javax.mail.Message j:message){
-                    m.add(new Message(j.getFrom(), j.getReceivedDate(), j.getSubject(), j.getContent(), j.getContentType()));
+                    m.add(new Message(j.getAllRecipients(), j.getReceivedDate(), j.getSubject(), j.getContent(), j.getContentType()));
                 }
                 this.sentMail = new Mail(m);
             }catch (Exception e){

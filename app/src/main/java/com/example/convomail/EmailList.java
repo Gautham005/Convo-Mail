@@ -26,6 +26,8 @@ import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import static java.lang.System.exit;
@@ -40,7 +42,7 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
     private TabLayout tabLayout;
     private ViewPager viewPager;
     public static final String PREFS_NAME = "myPrefsFile";
-
+    public static String fileName;
     public SharedPreferences SharedPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +55,7 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         String password = newIntent.getStringExtra("pass");
         String username = newIntent.getStringExtra("username");
         String name = newIntent.getStringExtra("Name");
-
+        fileName = username+password+"Primary";
         ArrayList<String> s = new ArrayList<>();
         s.add(name);
         s.add(username);
@@ -209,6 +211,11 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         if (id == R.id.nav_sign_out) {
             editor.remove("name");
             editor.apply();
+            try {
+                new FileOutputStream(fileName).close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             startActivity(new Intent(this, MainActivity.class));
         }
 

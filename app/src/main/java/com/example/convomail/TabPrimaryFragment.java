@@ -18,6 +18,7 @@ import android.widget.ProgressBar;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
@@ -27,13 +28,20 @@ import java.util.Date;
 import java.util.Properties;
 
 import javax.mail.AuthenticationFailedException;
+import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.mail.internet.InternetAddress;
+import javax.mail.search.ComparisonTerm;
+import javax.mail.search.FlagTerm;
+import javax.mail.search.ReceivedDateTerm;
+import javax.mail.search.SearchTerm;
 
 public class TabPrimaryFragment extends Fragment {
     static ArrayList<String> header = new ArrayList<String>();
+    static ArrayList<String> headernew = new ArrayList<String>();
     String body = "";
     private User user;
     Intent newIntent;
@@ -44,8 +52,13 @@ public class TabPrimaryFragment extends Fragment {
     private String[] month = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
     public static String fileName;
     public SharedPreferences SharedPreferences;
+    int flag = 0;
+    InternetAddress person;
+    Boolean fl = true;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        flag = 0;
+
         View rootview = inflater.inflate(R.layout.fragment_primary, container, false);
         list = rootview.findViewById(R.id.PrimaryList);
         ArrayList<String> s = getArguments().getStringArrayList("auth");
@@ -53,7 +66,7 @@ public class TabPrimaryFragment extends Fragment {
         user = new User(s.get(1), s.get(2), s.get(0));
         spinner = rootview.findViewById(R.id.progressBar1);
         setHasOptionsMenu(true);
-        fileName = user.getName()+"Primary";
+        fileName = user.getUserID()+user.getName()+"Primary";
         try {
             FileInputStream fis = getContext().openFileInput(fileName);
             ObjectInputStream is = new ObjectInputStream(fis);
@@ -61,7 +74,9 @@ public class TabPrimaryFragment extends Fragment {
             is.close();
             fis.close();
             Inbox inbox = user1.getInbox();
+
             Date tempDate;
+            header.clear();
             String tempSubject, tempHeader, tempFrom;
             for (int i = 0; i < inbox.getPrimary().getMessages().size(); i++) {
                 tempDate = null;
@@ -69,15 +84,20 @@ public class TabPrimaryFragment extends Fragment {
                 tempHeader = "";
                 tempDate = inbox.getPrimary().getMessages().get(i).getDate();
 
-                tempSubject = inbox.getPrimary().getMessages().get(i).getSubject().toString();
-                tempFrom = inbox.getPrimary().getMessages().get(i).getFromAddress()[0].toString();
-                tempHeader = tempFrom + "\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + month[tempDate.getMonth()]+ " " +  tempDate.getDate() +" "+ (tempDate.getYear()+1900)+ "\n\n" + tempSubject;
+                tempSubject = inbox.getPrimary().getMessages().get(i).getSubject();
+                if(tempSubject == null){
+                    tempSubject = "(No subject)";
+                }
+                person = (InternetAddress)inbox.getPrimary().getMessages().get(i).getFromAddress()[0];
+
+                tempFrom = person.getPersonal();
+                tempHeader = tempFrom + "\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + month[tempDate.getMonth()] + " " + tempDate.getDate() + " " + (tempDate.getYear() + 1900) + "\n\n" + tempSubject;
                 Log.d("header", tempHeader);
 
                 System.out.print(tempHeader);
                 header.add(tempHeader);
             }
-            adapter = new ArrayAdapter<String>(getContext(), R.layout.dataview, R.id.TextView ,header);
+            adapter = new ArrayAdapter<String>(getContext(), R.layout.dataview, R.id.TextView, header);
             list = (ListView) rootview.findViewById(R.id.PrimaryList);
             list.setAdapter(adapter);
             list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -89,12 +109,15 @@ public class TabPrimaryFragment extends Fragment {
                     startActivity(in);
                 }
             });
-            connectServer(user);
-            setRetainInstance(true);
 
+
+        }catch(FileNotFoundException e){ flag = 1;
+         fl = false;
         }catch (Exception e){
             Log.d("cac", e.toString());
         }
+        connectServer(user);
+        setRetainInstance(true);
         return rootview;
 
     }
@@ -112,22 +135,36 @@ public class TabPrimaryFragment extends Fragment {
     }
     public void setInbox(Inbox inbox){
         try{
-            header.clear();
+            headernew.clear();
             Date tempDate;
             String tempSubject, tempHeader, tempFrom;
             for (int i = 0; i < inbox.getPrimary().getMessages().size(); i++) {
                 tempDate = null;
                 tempSubject = "";
                 tempHeader = "";
+                tempFrom="";
                 tempDate = inbox.getPrimary().getMessages().get(i).getDate();
 
-                tempSubject = inbox.getPrimary().getMessages().get(i).getSubject().toString();
-                tempFrom = inbox.getPrimary().getMessages().get(i).getFromAddress()[0].toString();
+                tempSubject = inbox.getPrimary().getMessages().get(i).getSubject();
+                if(tempSubject == null){
+                    tempSubject = "(No subject)";
+                }
+                person = (InternetAddress)inbox.getPrimary().getMessages().get(i).getFromAddress()[0];
+
+                tempFrom = person.getPersonal();
                 tempHeader = tempFrom + "\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + month[tempDate.getMonth()]+ " " +  tempDate.getDate() +" "+ (tempDate.getYear()+1900)+ "\n\n" + tempSubject;
                 Log.d("header", tempHeader);
 
                 System.out.print(tempHeader);
-                header.add(tempHeader);
+                if(!header.contains(tempHeader)){
+                    headernew.add(tempHeader);
+                }
+            }
+            headernew.addAll(header);
+            header.clear();
+            header = headernew;
+            if(header.size()==0&&headernew.size()==0&&!fl){
+                header.add("No new messages");
             }
 //            Log.d("size", h.get(0));
             user.setInbox(inbox);
@@ -242,21 +279,30 @@ public class TabPrimaryFragment extends Fragment {
                         System.in));
 
                 // retrieve the messages from the folder in an array and print it
-                Message[] messages = emailFolder.getMessages();
-                String tempDate, tempSubject, tempHeader, tempFrom;
-                for (int i = messages.length-1; i >=0; i--) {
-                    tempDate = "";
-                    tempSubject = "";
-                    tempHeader = "";
-                    tempDate = messages[i].getSentDate().toString();
-                    tempSubject = messages[i].getSubject().toString();
-                    tempFrom = messages[i].getFrom()[0].toString();
-                    tempHeader = tempDate + "\n" + tempSubject + "\n" + tempFrom;
-                    Log.d("header", tempHeader);
-
-                    System.out.print(tempHeader);
-//                    header.add(tempHeader);
+                Message[] messages;
+                if(flag==0){
+                   messages = emailFolder.search(new FlagTerm(new Flags(
+                            Flags.Flag.SEEN), false));
                 }
+                else{
+                    messages = emailFolder.getMessages();
+                }
+
+                //                String tempDate, tempSubject, tempHeader, tempFrom;
+//                for (int i = messages.length-1; i >=0; i--) {
+//                    tempDate = "";
+//                    tempSubject = "";
+//                    temp
+//                    tempHeader = "";
+//                    tempDate = messages[i].getSentDate().toString();
+//                    tempSubject = messages[i].getSubject();
+////                    tempFrom = messages[i].getFrom()[0].toString();
+//                    tempHeader = tempDate + "\n" + tempSubject + "\n" + tempFrom;
+//                    Log.d("header", tempHeader);
+//
+//                    System.out.print(tempHeader);
+////                    header.add(tempHeader);
+//                }
                 ArrayList<Message> m = new ArrayList<Message>();
                 messages = reverse(messages, messages.length);
 
@@ -275,7 +321,7 @@ public class TabPrimaryFragment extends Fragment {
                 startActivity(i);
             }
             catch (Exception e){
-                Log.d("err", e.toString()) ;
+                Log.d("err1", e.toString()) ;
 
             }
             return inbox;
@@ -286,15 +332,21 @@ public class TabPrimaryFragment extends Fragment {
             super.onPreExecute();
 //            progressDialog = ProgressDialog.show(this.context,"Retrieving messages","Please wait...",false,false);
 
-//            spinner.setVisibility(View.VISIBLE);
+            if(flag==1){
+                spinner.setVisibility(View.VISIBLE);
+
+            }
         }
 
         protected  void onPostExecute(Inbox inbox) {
 
 //            progressDialog.dismiss();
-//            spinner.setVisibility(View.GONE);
-            setInbox(inbox);
+if(flag==1) {
+    spinner.setVisibility(View.GONE);
+
+}
+flag = 0;setInbox(inbox);
+}
 
         }
     }
-}

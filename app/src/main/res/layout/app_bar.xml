@@ -10,7 +10,8 @@
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:theme="@style/MyToolbarTheme">
+        android:theme="@style/MyToolbarTheme"
+        android:isScrollContainer="true">
         <!--android:theme="@style/AppTheme.AppBarOverlay">-->
 
 
@@ -19,15 +20,19 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
-            android:theme="@style/MyToolbarTheme" />
+            android:theme="@style/MyToolbarTheme"
+            />
         <!--app:popupTheme="@style/AppTheme.PopupOverlay" />-->
 
         <TextView
             android:id="@+id/subject"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.08"
+            android:layout_weight="0.1"
             android:padding="20dp"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColorHighlight="@color/colorPrimary"
             android:text="TextView" />
 
         <LinearLayout
@@ -56,16 +61,30 @@
 
 
         </LinearLayout>
+        <ProgressBar
+            android:id="@+id/progressBar2"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_weight="0.6"
+            android:scaleY="0.1"
+            android:scaleX="0.1"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone"/>
         <TextView
             android:id="@+id/content"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_marginLeft="0dp"
             android:layout_marginTop="0dp"
             android:layout_marginRight="0dp"
             android:layout_weight="0.6"
             android:padding="20dp"
-            android:text="TextView" />
+            android:text="TextView"
+            android:scrollbars="vertical"
+            android:visibility="gone"/>
 
     </android.support.design.widget.AppBarLayout>
 
