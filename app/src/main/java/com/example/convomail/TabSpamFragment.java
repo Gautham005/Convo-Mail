@@ -9,28 +9,29 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 
-import javax.mail.AuthenticationFailedException;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Store;
-
-import static android.content.Context.MODE_PRIVATE;
+import javax.mail.internet.InternetAddress;
 
 public class TabSpamFragment extends Fragment {
     static ArrayList<String> header = new ArrayList<String>();
@@ -43,9 +44,15 @@ public class TabSpamFragment extends Fragment {
     public static final String PREFS_NAME = "myPrefsFile";
     private String[] month = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
+    public static String fileName;
     public SharedPreferences SharedPreferences;
+    int flag = 0;
+    InternetAddress person;
+    Boolean fl = true;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        flag = 0;
+        fl = false;
         View rootview = inflater.inflate(R.layout.fragment_spam, container, false);
         list = rootview.findViewById(R.id.SpamMailList);
         ArrayList<String> s = getArguments().getStringArrayList("auth");
@@ -55,6 +62,60 @@ public class TabSpamFragment extends Fragment {
         setHasOptionsMenu(true);
 
         connectServer(user);
+        fileName = user.getUserID() + user.getName() + "Spam";
+        try {
+            FileInputStream fis = getContext().openFileInput(fileName);
+            ObjectInputStream is = new ObjectInputStream(fis);
+            User user1 = (User) is.readObject();
+            is.close();
+            fis.close();
+            Inbox inbox = user1.getInbox();
+
+            Date tempDate;
+            header.clear();
+            String tempSubject, tempHeader, tempFrom;
+            for (int i = 0; i < inbox.getSpam().getMessages().size(); i++) {
+                tempDate = null;
+                tempSubject = "";
+                tempHeader = "";
+                tempDate = inbox.getSpam().getMessages().get(i).getDate();
+
+                tempSubject = inbox.getSpam().getMessages().get(i).getSubject();
+                if (tempSubject == null) {
+                    tempSubject = "(No subject)";
+                }
+                person = (InternetAddress) inbox.getSpam().getMessages().get(i).getFromAddress()[0];
+
+                tempFrom = person.getPersonal();
+                if (tempFrom == null) {
+                    tempFrom = person.getAddress();
+                }
+                tempHeader = tempFrom + "\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + month[tempDate.getMonth()] + " " + tempDate.getDate() + " " + (tempDate.getYear() + 1900) + "\n\n" + tempSubject;
+                Log.d("header", tempHeader);
+
+                System.out.print(tempHeader);
+                header.add(tempHeader);
+            }
+            adapter = new ArrayAdapter<String>(getContext(), R.layout.dataview, R.id.TextView, header);
+            list = (ListView) rootview.findViewById(R.id.SpamMailList);
+            list.setAdapter(adapter);
+            list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    Intent in = new Intent(getContext(), EmailDetailView.class);
+                    in.putExtra("file", fileName);
+                    in.putExtra("position", i);
+                    startActivity(in);
+                }
+            });
+
+
+        } catch (FileNotFoundException e) {
+            flag = 1;
+            fl = false;
+        } catch (Exception e) {
+            Log.d("cacSPam", e.toString());
+        }
         setRetainInstance(true);
 
         return rootview;
@@ -75,19 +136,33 @@ public class TabSpamFragment extends Fragment {
         try{
             header.clear();
             Date tempDate;
-            String  tempSubject, tempHeader, tempFrom;
+            String tempSubject, tempHeader, tempFrom;
             for (int i = 0; i < inbox.getSpam().getMessages().size(); i++) {
                 tempDate = null;
                 tempSubject = "";
                 tempHeader = "";
+                tempFrom = "";
                 tempDate = inbox.getSpam().getMessages().get(i).getDate();
-                tempSubject = inbox.getSpam().getMessages().get(i).getSubject().toString();
-                tempFrom = inbox.getSpam().getMessages().get(i).getFromAddress()[0].toString();
-                tempHeader = tempFrom + "\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + month[tempDate.getMonth()]+ " " +  tempDate.getDate() +" "+ (tempDate.getYear()+1900)+ "\n\n" + tempSubject;
+
+                tempSubject = inbox.getSpam().getMessages().get(i).getSubject();
+                if (tempSubject == null) {
+                    tempSubject = "(No subject)";
+                }
+                person = (InternetAddress) inbox.getSpam().getMessages().get(i).getFromAddress()[0];
+
+                tempFrom = person.getPersonal();
+                if (tempFrom == null) {
+                    tempFrom = person.getAddress();
+                }
+                tempHeader = tempFrom + TabPrimaryFragment.getSpace() + month[tempDate.getMonth()] + " " + tempDate.getDate() + " " + (tempDate.getYear() + 1900) + "\n\n" + tempSubject;
                 Log.d("header", tempHeader);
 
                 System.out.print(tempHeader);
                 header.add(tempHeader);
+            }
+
+            if (header.size() == 0 && !fl) {
+                header.add("No new messages");
             }
 //            Log.d("size", h.get(0));
             user.setInbox(inbox);
@@ -95,9 +170,23 @@ public class TabSpamFragment extends Fragment {
             adapter = new ArrayAdapter<String>(getContext(), R.layout.dataview, R.id.TextView ,header);
             list = (ListView) getView().findViewById(R.id.SpamMailList);
             list.setAdapter(adapter);
+            FileOutputStream fos = getContext().openFileOutput(fileName, Context.MODE_PRIVATE);
+            ObjectOutputStream os = new ObjectOutputStream(fos);
+            os.writeObject(user);
+            os.close();
+            fos.close();
+            list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    Intent in = new Intent(getContext(), EmailDetailView.class);
+                    in.putExtra("file", fileName);
+                    in.putExtra("position", i);
+                    startActivity(in);
+                }
+            });
         }
         catch (Exception e){
-            Log.d("Error", e.toString());
+            Log.d("ErrorSpam", e.toString());
         }
 
 
@@ -225,15 +314,22 @@ public class TabSpamFragment extends Fragment {
         protected void onPreExecute() {
             super.onPreExecute();
 //            progressDialog = ProgressDialog.show(this.context,"Retrieving messages","Please wait...",false,false);
-            spinner.setVisibility(View.VISIBLE);
+
+            if (flag == 1) {
+                spinner.setVisibility(View.VISIBLE);
+
+            }
         }
 
         protected  void onPostExecute(Inbox inbox) {
 
 //            progressDialog.dismiss();
-            spinner.setVisibility(View.GONE);
-            setInbox(inbox);
+            if (flag == 1) {
+                spinner.setVisibility(View.GONE);
 
+            }
+            flag = 0;
+            setInbox(inbox);
         }
     }
 

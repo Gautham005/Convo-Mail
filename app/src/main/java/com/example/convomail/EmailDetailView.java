@@ -5,12 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -20,13 +20,10 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-
 import org.jsoup.Jsoup;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
@@ -35,7 +32,6 @@ import java.util.Properties;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.BodyPart;
 import javax.mail.Folder;
-import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
@@ -86,7 +82,17 @@ public class EmailDetailView extends AppCompatActivity implements NavigationView
             TextView email = (TextView) header.findViewById(R.id.UserEmail);
             uname.setText(user.getName());
             email.setText(user.getUserID());
-            m = user.inbox.getPrimary().getMessages().get(pos);
+            if (fileName.contains("Primary")) {
+                m = user.inbox.getPrimary().getMessages().get(pos);
+            } else if (fileName.contains("Draft")) {
+                m = user.inbox.getDraft().getMessages().get(pos);
+            } else if (fileName.contains("Spam")) {
+                m = user.inbox.getSpam().getMessages().get(pos);
+            } else if (fileName.contains("Trash")) {
+                m = user.inbox.getTrash().getMessages().get(pos);
+            } else if (fileName.contains("SentMail")) {
+                m = user.inbox.getSentMail().getMessages().get(pos);
+            }
             msgno = m.getMsgno();
             InternetAddress person = (InternetAddress)m.getFromAddress()[0];
             fromAddress = findViewById(R.id.fromAddr);

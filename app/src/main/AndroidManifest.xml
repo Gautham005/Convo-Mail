@@ -18,6 +18,7 @@
             android:name=".EmailDetailView"
             android:label="@string/title_activity_email_detail_view"
             android:theme="@style/AppTheme.NoActionBar"/>
+        <activity android:name=".ComposeActivity" />
         <activity android:name=".dataview" />
         <activity android:name=".BodyClass" />
         <activity

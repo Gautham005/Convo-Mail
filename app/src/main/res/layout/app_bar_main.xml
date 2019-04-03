@@ -87,6 +87,7 @@
         android:backgroundTint="@color/colorPrimary"
         app:srcCompat="@drawable/ic_add_black_48dp"
         tools:ignore="VectorDrawableCompat"
+        android:onClick="Compose"
         />
 
 

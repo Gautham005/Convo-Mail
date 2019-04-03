@@ -28,20 +28,14 @@ import java.util.Date;
 import java.util.Properties;
 
 import javax.mail.AuthenticationFailedException;
-import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
-import javax.mail.search.ComparisonTerm;
-import javax.mail.search.FlagTerm;
-import javax.mail.search.ReceivedDateTerm;
-import javax.mail.search.SearchTerm;
 
 public class TabPrimaryFragment extends Fragment {
     static ArrayList<String> header = new ArrayList<String>();
-    static ArrayList<String> headernew = new ArrayList<String>();
     String body = "";
     private User user;
     Intent newIntent;
@@ -55,9 +49,27 @@ public class TabPrimaryFragment extends Fragment {
     int flag = 0;
     InternetAddress person;
     Boolean fl = true;
+
+    public static String getSpace() {
+        return "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
+    }
+
+    public void connectServer(User user) {
+        try {
+            Log.d("nnn", "rm");
+            new RetrieveMessages(getContext()).execute(user.getUserID(), user.getPassword());
+            Log.d("nnn", "rm");
+
+        } catch (Exception e) {
+        }
+
+
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         flag = 0;
+        fl = false;
 
         View rootview = inflater.inflate(R.layout.fragment_primary, container, false);
         list = rootview.findViewById(R.id.PrimaryList);
@@ -91,6 +103,10 @@ public class TabPrimaryFragment extends Fragment {
                 person = (InternetAddress)inbox.getPrimary().getMessages().get(i).getFromAddress()[0];
 
                 tempFrom = person.getPersonal();
+                tempFrom = person.getPersonal();
+                if (tempFrom == null) {
+                    tempFrom = person.getAddress();
+                }
                 tempHeader = tempFrom + "\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + month[tempDate.getMonth()] + " " + tempDate.getDate() + " " + (tempDate.getYear() + 1900) + "\n\n" + tempSubject;
                 Log.d("header", tempHeader);
 
@@ -114,7 +130,7 @@ public class TabPrimaryFragment extends Fragment {
         }catch(FileNotFoundException e){ flag = 1;
          fl = false;
         }catch (Exception e){
-            Log.d("cac", e.toString());
+            Log.d("cacPri", e.toString());
         }
         connectServer(user);
         setRetainInstance(true);
@@ -122,20 +138,9 @@ public class TabPrimaryFragment extends Fragment {
 
     }
 
-    public  void connectServer(User user) {
-        try {
-            Log.d("nnn", "rm");
-            new RetrieveMessages(getContext()).execute(user.getUserID(), user.getPassword());
-            Log.d("nnn", "rm");
-
-        }
-        catch(Exception e){}
-
-
-    }
     public void setInbox(Inbox inbox){
         try{
-            headernew.clear();
+            header.clear();
             Date tempDate;
             String tempSubject, tempHeader, tempFrom;
             for (int i = 0; i < inbox.getPrimary().getMessages().size(); i++) {
@@ -152,18 +157,18 @@ public class TabPrimaryFragment extends Fragment {
                 person = (InternetAddress)inbox.getPrimary().getMessages().get(i).getFromAddress()[0];
 
                 tempFrom = person.getPersonal();
-                tempHeader = tempFrom + "\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + month[tempDate.getMonth()]+ " " +  tempDate.getDate() +" "+ (tempDate.getYear()+1900)+ "\n\n" + tempSubject;
+                tempFrom = person.getPersonal();
+                if (tempFrom == null) {
+                    tempFrom = person.getAddress();
+                }
+                tempHeader = tempFrom + getSpace() + month[tempDate.getMonth()] + " " + tempDate.getDate() + " " + (tempDate.getYear() + 1900) + "\n\n" + tempSubject;
                 Log.d("header", tempHeader);
 
                 System.out.print(tempHeader);
-                if(!header.contains(tempHeader)){
-                    headernew.add(tempHeader);
-                }
+                header.add(tempHeader);
             }
-            headernew.addAll(header);
-            header.clear();
-            header = headernew;
-            if(header.size()==0&&headernew.size()==0&&!fl){
+
+            if (header.size() == 0 && !fl) {
                 header.add("No new messages");
             }
 //            Log.d("size", h.get(0));
@@ -188,7 +193,7 @@ public class TabPrimaryFragment extends Fragment {
             });
         }
         catch (Exception e){
-            Log.d("Error", e.toString());
+            Log.d("ErrorPri", e.toString());
         }
 
 
@@ -280,13 +285,9 @@ public class TabPrimaryFragment extends Fragment {
 
                 // retrieve the messages from the folder in an array and print it
                 Message[] messages;
-                if(flag==0){
-                   messages = emailFolder.search(new FlagTerm(new Flags(
-                            Flags.Flag.SEEN), false));
-                }
-                else{
-                    messages = emailFolder.getMessages();
-                }
+
+                messages = emailFolder.getMessages();
+
 
                 //                String tempDate, tempSubject, tempHeader, tempFrom;
 //                for (int i = messages.length-1; i >=0; i--) {

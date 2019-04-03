@@ -4,16 +4,13 @@ import android.util.Log;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
-
-import javax.mail.MessagingException;
 
 public class Inbox implements Serializable {
-    public Mail primary;
-    public Mail draft;
-    public Mail spam;
-    public Mail trash;
-    public Mail sentMail;
+    private Mail primary;
+    private Mail draft;
+    private Mail spam;
+    private Mail trash;
+    private Mail sentMail;
 
     public Inbox(Mail p, Mail d, Mail s, Mail t){
         this.primary = p;
@@ -36,7 +33,7 @@ public class Inbox implements Serializable {
         try{
             ArrayList<Message> m = new ArrayList<>();
             for(javax.mail.Message j:message){
-                m.add(new Message(j.getFrom(), j.getReceivedDate(), j.getSubject(), j.getContent(), j.getContentType()));
+                m.add(new Message(j.getFrom(), j.getReceivedDate(), j.getSubject(), j.getMessageNumber(), j.getContentType()));
             }
             this.draft = new Mail(m);
         }catch (Exception e){
@@ -46,7 +43,7 @@ public class Inbox implements Serializable {
             try{
                 ArrayList<Message> m = new ArrayList<>();
                 for(javax.mail.Message j:message){
-                    m.add(new Message(j.getAllRecipients(), j.getReceivedDate(), j.getSubject(), j.getContent(), j.getContentType()));
+                    m.add(new Message(j.getAllRecipients(), j.getReceivedDate(), j.getSubject(), j.getMessageNumber(), j.getContentType()));
                 }
                 this.sentMail = new Mail(m);
             }catch (Exception e){
@@ -57,7 +54,7 @@ public class Inbox implements Serializable {
         try{
             ArrayList<Message> m = new ArrayList<>();
             for(javax.mail.Message j:message){
-                m.add(new Message(j.getFrom(), j.getReceivedDate(), j.getSubject(), j.getContent(), j.getContentType()));
+                m.add(new Message(j.getFrom(), j.getReceivedDate(), j.getSubject(), j.getMessageNumber(), j.getContentType()));
             }
             this.spam = new Mail(m);
         }catch (Exception e){
@@ -68,7 +65,7 @@ public class Inbox implements Serializable {
         try{
             ArrayList<Message> m = new ArrayList<>();
             for(javax.mail.Message j:message){
-                m.add(new Message(j.getFrom(), j.getReceivedDate(), j.getSubject(), j.getContent(), j.getContentType()));
+                m.add(new Message(j.getFrom(), j.getReceivedDate(), j.getSubject(), j.getMessageNumber(), j.getContentType()));
             }
             this.trash = new Mail(m);
         }catch (Exception e){

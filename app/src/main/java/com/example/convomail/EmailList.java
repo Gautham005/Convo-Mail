@@ -1,16 +1,11 @@
 package com.example.convomail;
 
 import android.app.FragmentTransaction;
-import android.app.ProgressDialog;
-import android.app.TabActivity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
@@ -18,19 +13,14 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-
-import static java.lang.System.exit;
 
 
 public class EmailList extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
@@ -89,13 +79,6 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Compose a new mail", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -222,6 +205,11 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void Compose(View view) {
+        Intent in = new Intent(this, ComposeActivity.class);
+        startActivity(in);
     }
 //    protected void onActivityResult(int a, int b, Intent intent){
 //        this.finish();
