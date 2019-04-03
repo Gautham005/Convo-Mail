@@ -88,7 +88,7 @@ public class TabTrashFragment extends Fragment {
                 if (tempFrom == null) {
                     tempFrom = person.getAddress();
                 }
-                tempHeader = tempFrom + "\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + month[tempDate.getMonth()] + " " + tempDate.getDate() + " " + (tempDate.getYear() + 1900) + "\n\n" + tempSubject;
+                tempHeader = tempFrom + "\n" + month[tempDate.getMonth()] + " " + tempDate.getDate() + " " + (tempDate.getYear() + 1900) + "\t\t" + tempSubject;
                 Log.d("header", tempHeader);
 
                 System.out.print(tempHeader);
@@ -114,7 +114,7 @@ public class TabTrashFragment extends Fragment {
         } catch (Exception e) {
             Log.d("cacTrash", e.toString());
         }
-        connectServer(user);
+//        connectServer(user);
 
         setRetainInstance(true);
 
@@ -153,7 +153,7 @@ public class TabTrashFragment extends Fragment {
                 if (tempFrom == null) {
                     tempFrom = person.getAddress();
                 }
-                tempHeader = tempFrom + TabPrimaryFragment.getSpace() + month[tempDate.getMonth()] + " " + tempDate.getDate() + " " + (tempDate.getYear() + 1900) + "\n\n" + tempSubject;
+                tempHeader = tempFrom + "\n" + month[tempDate.getMonth()] + " " + tempDate.getDate() + " " + (tempDate.getYear() + 1900) + "\t\t" + tempSubject;
                 Log.d("header", tempHeader);
 
                 System.out.print(tempHeader);
@@ -277,20 +277,7 @@ class RetrieveMessages extends AsyncTask<String, Void, Inbox> {
 
             // retrieve the messages from the folder in an array and print it
             Message[] messages = emailFolder.getMessages();
-            String tempDate, tempSubject, tempHeader, tempFrom;
-            for (int i = messages.length-1; i >=0; i--) {
-                tempDate = "";
-                tempSubject = "";
-                tempHeader = "";
-                tempDate = messages[i].getSentDate().toString();
-                tempSubject = messages[i].getSubject().toString();
-                tempFrom = messages[i].getFrom()[0].toString();
-                tempHeader = tempDate + "\n" + tempSubject + "\n" + tempFrom;
-                Log.d("header", tempHeader);
 
-                System.out.print(tempHeader);
-                header.add(tempHeader);
-            }
             messages = reverse(messages, messages.length);
 
 

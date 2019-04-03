@@ -107,7 +107,7 @@ public class TabPrimaryFragment extends Fragment {
                 if (tempFrom == null) {
                     tempFrom = person.getAddress();
                 }
-                tempHeader = tempFrom + "\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + month[tempDate.getMonth()] + " " + tempDate.getDate() + " " + (tempDate.getYear() + 1900) + "\n\n" + tempSubject;
+                tempHeader = tempFrom + "\n" + month[tempDate.getMonth()] + " " + tempDate.getDate() + " " + (tempDate.getYear() + 1900) + "\t\t" + tempSubject;
                 Log.d("header", tempHeader);
 
                 System.out.print(tempHeader);
@@ -132,7 +132,7 @@ public class TabPrimaryFragment extends Fragment {
         }catch (Exception e){
             Log.d("cacPri", e.toString());
         }
-        connectServer(user);
+//        connectServer(user);
         setRetainInstance(true);
         return rootview;
 
@@ -161,7 +161,7 @@ public class TabPrimaryFragment extends Fragment {
                 if (tempFrom == null) {
                     tempFrom = person.getAddress();
                 }
-                tempHeader = tempFrom + getSpace() + month[tempDate.getMonth()] + " " + tempDate.getDate() + " " + (tempDate.getYear() + 1900) + "\n\n" + tempSubject;
+                tempHeader = tempFrom + "\n" + month[tempDate.getMonth()] + " " + tempDate.getDate() + " " + (tempDate.getYear() + 1900) + "\t\t" + tempSubject;
                 Log.d("header", tempHeader);
 
                 System.out.print(tempHeader);

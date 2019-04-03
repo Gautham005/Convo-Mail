@@ -34,6 +34,11 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
     public static final String PREFS_NAME = "myPrefsFile";
     public static String fileName;
     public SharedPreferences SharedPreferences;
+    TabPrimaryFragment tp = new TabPrimaryFragment();
+    TabSentMailFragment tsm=new TabSentMailFragment();
+    TabDraftFragment td=new TabDraftFragment();
+    TabSpamFragment tsp=new TabSpamFragment();
+    TabTrashFragment tt=new TabTrashFragment();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +50,7 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         String password = newIntent.getStringExtra("pass");
         String username = newIntent.getStringExtra("username");
         String name = newIntent.getStringExtra("Name");
+
         fileName = username+password+"Primary";
         ArrayList<String> s = new ArrayList<>();
         s.add(name);
@@ -53,11 +59,7 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         user = new User(username, password, name);
         Bundle b = new Bundle();
         b.putStringArrayList("auth",s);
-        TabPrimaryFragment tp = new TabPrimaryFragment();
-        TabSentMailFragment tsm = new TabSentMailFragment();
-        TabDraftFragment td = new TabDraftFragment();
-        TabSpamFragment tsp = new TabSpamFragment();
-        TabTrashFragment tt = new TabTrashFragment();
+
         tp.setArguments(b);
         tsm.setArguments(b);
         td.setArguments(b);
@@ -178,6 +180,13 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        }
+        else if(id == R.id.sync1){
+            tp.connectServer(user);
+            tsm.connectServer(user);
+            td.connectServer(user);
+            tsp.connectServer(user);
+            tt.connectServer(user);
         }
 
         return super.onOptionsItemSelected(item);
