@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -24,6 +25,7 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 
@@ -33,6 +35,9 @@ import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
+import javax.mail.search.ComparisonTerm;
+import javax.mail.search.ReceivedDateTerm;
+import javax.mail.search.SearchTerm;
 
 public class TabPrimaryFragment extends Fragment {
     static ArrayList<String> header = new ArrayList<String>();
@@ -49,15 +54,17 @@ public class TabPrimaryFragment extends Fragment {
     int flag = 0;
     InternetAddress person;
     Boolean fl = true;
-
+    int getMessageDate;
     public static String getSpace() {
         return "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
     }
 
-    public void connectServer(User user) {
+    public void connectServer(User user, boolean var) {
         try {
-            Log.d("nnn", "rm");
-            new RetrieveMessages(getContext()).execute(user.getUserID(), user.getPassword());
+
+
+                new RetrieveMessages(getContext()).execute(user.getUserID(), user.getPassword());
+
             Log.d("nnn", "rm");
 
         } catch (Exception e) {
@@ -70,7 +77,9 @@ public class TabPrimaryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         flag = 0;
         fl = false;
-
+        getMessageDate=-2;
+        Toast t = Toast.makeText(getContext(), "Please click on sync button to get new messages", Toast.LENGTH_LONG);
+        t.show();
         View rootview = inflater.inflate(R.layout.fragment_primary, container, false);
         list = rootview.findViewById(R.id.PrimaryList);
         ArrayList<String> s = getArguments().getStringArrayList("auth");
@@ -255,6 +264,8 @@ public class TabPrimaryFragment extends Fragment {
 
         return b;
         }
+
+
         @Override
         protected Inbox doInBackground(String... strings) {
             Inbox inbox = new Inbox(new Mail(new ArrayList<com.example.convomail.Message>()), new Mail(new ArrayList<com.example.convomail.Message>()), new Mail(new ArrayList<com.example.convomail.Message>()), new Mail(new ArrayList<com.example.convomail.Message>()));
@@ -279,14 +290,17 @@ public class TabPrimaryFragment extends Fragment {
 
                 Folder emailFolder = store.getFolder(this.getFold(strings[0]));
                 emailFolder.open(Folder.READ_ONLY);
+                Calendar c = Calendar.getInstance();
+                c.add(Calendar.MONTH, getMessageDate);
 
-                BufferedReader reader = new BufferedReader(new InputStreamReader(
-                        System.in));
+                SearchTerm newerThan = new ReceivedDateTerm(ComparisonTerm.GT, c.getTime());
+
+
 
                 // retrieve the messages from the folder in an array and print it
                 Message[] messages;
 
-                messages = emailFolder.getMessages();
+                messages = emailFolder.search(newerThan);
 
 
                 //                String tempDate, tempSubject, tempHeader, tempFrom;
@@ -333,7 +347,7 @@ public class TabPrimaryFragment extends Fragment {
             super.onPreExecute();
 //            progressDialog = ProgressDialog.show(this.context,"Retrieving messages","Please wait...",false,false);
 
-            if(flag==1){
+            if(flag==2){
                 spinner.setVisibility(View.VISIBLE);
 
             }
@@ -342,11 +356,11 @@ public class TabPrimaryFragment extends Fragment {
         protected  void onPostExecute(Inbox inbox) {
 
 //            progressDialog.dismiss();
-if(flag==1) {
+if(flag==2) {
     spinner.setVisibility(View.GONE);
 
 }
-flag = 0;setInbox(inbox);
+setInbox(inbox);
 }
 
         }

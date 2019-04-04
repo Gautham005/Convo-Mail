@@ -13,6 +13,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -50,6 +51,7 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         String password = newIntent.getStringExtra("pass");
         String username = newIntent.getStringExtra("username");
         String name = newIntent.getStringExtra("Name");
+        String bo = newIntent.getStringExtra("first");
 
         fileName = username+password+"Primary";
         ArrayList<String> s = new ArrayList<>();
@@ -95,6 +97,15 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         TextView email = (TextView) header.findViewById(R.id.UserEmail);
         uname.setText(name);
         email.setText(username);
+        if(bo.equals("true")){
+            Log.d("login", bo);
+
+            tp.connectServer(user, true);
+            tsm.connectServer(user, true);
+            td.connectServer(user, true);
+            tsp.connectServer(user, true);
+            tt.connectServer(user, true);
+        }
         //        user.loadData(this);
 //
 //
@@ -182,11 +193,11 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
             return true;
         }
         else if(id == R.id.sync1){
-            tp.connectServer(user);
-            tsm.connectServer(user);
-            td.connectServer(user);
-            tsp.connectServer(user);
-            tt.connectServer(user);
+            tp.connectServer(user, false);
+            tsm.connectServer(user, false);
+            td.connectServer(user, false);
+            tsp.connectServer(user, false);
+            tt.connectServer(user, false);
         }
 
         return super.onOptionsItemSelected(item);

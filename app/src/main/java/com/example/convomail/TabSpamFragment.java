@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 
@@ -32,6 +33,9 @@ import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
+import javax.mail.search.ComparisonTerm;
+import javax.mail.search.ReceivedDateTerm;
+import javax.mail.search.SearchTerm;
 
 public class TabSpamFragment extends Fragment {
     static ArrayList<String> header = new ArrayList<String>();
@@ -49,9 +53,11 @@ public class TabSpamFragment extends Fragment {
     int flag = 0;
     InternetAddress person;
     Boolean fl = true;
+    private int getMessageDate;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         flag = 0;
+        getMessageDate=-2;
         fl = false;
         View rootview = inflater.inflate(R.layout.fragment_spam, container, false);
         list = rootview.findViewById(R.id.SpamMailList);
@@ -110,7 +116,6 @@ public class TabSpamFragment extends Fragment {
 
 
         } catch (FileNotFoundException e) {
-            flag = 1;
             fl = false;
         } catch (Exception e) {
             Log.d("cacSPam", e.toString());
@@ -123,8 +128,11 @@ public class TabSpamFragment extends Fragment {
 
 
 
-    public  void connectServer(User user) {
+    public  void connectServer(User user, boolean var) {
         try {
+            if(var){
+                flag=1;
+            }
             new RetrieveMessages(getContext()).execute(user.getUserID(), user.getPassword());
         }
         catch(Exception e){}
@@ -194,6 +202,7 @@ public class TabSpamFragment extends Fragment {
     class RetrieveMessages extends AsyncTask<String, Void, Inbox> {
         private Context context;
         ProgressDialog progressDialog;
+
         RetrieveMessages(Context c){
             this.context = c;
         }
@@ -276,8 +285,14 @@ public class TabSpamFragment extends Fragment {
                         System.in));
 
                 // retrieve the messages from the folder in an array and print it
-                Message[] messages = emailFolder.getMessages();
+                Calendar c = Calendar.getInstance();
 
+                c.add(Calendar.MONTH, getMessageDate);
+
+                SearchTerm newerThan = new ReceivedDateTerm(ComparisonTerm.GT, c.getTime());
+                Message[] messages;
+
+                messages = emailFolder.search(newerThan);
                 messages = reverse(messages, messages.length);
 
                 inbox.setSpam(messages);

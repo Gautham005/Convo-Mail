@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 
@@ -32,6 +33,9 @@ import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
+import javax.mail.search.ComparisonTerm;
+import javax.mail.search.ReceivedDateTerm;
+import javax.mail.search.SearchTerm;
 
 public class TabSentMailFragment extends Fragment {
     static ArrayList<String> header = new ArrayList<String>();
@@ -49,10 +53,13 @@ public class TabSentMailFragment extends Fragment {
     int flag = 0;
     InternetAddress person;
     Boolean fl = true;
+    private int getMessageDate;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         flag = 0;
         fl = false;
+        getMessageDate=-2;
         View rootview = inflater.inflate(R.layout.fragment_sentmail, container, false);
         list = rootview.findViewById(R.id.SentMailList);
         ArrayList<String> s = getArguments().getStringArrayList("auth");
@@ -111,7 +118,6 @@ public class TabSentMailFragment extends Fragment {
 
 
         } catch (FileNotFoundException e) {
-            flag = 1;
             fl = false;
         } catch (Exception e) {
             Log.d("cacSM", e.toString());
@@ -122,9 +128,12 @@ public class TabSentMailFragment extends Fragment {
     }
 
 
-    public  void connectServer(User user) {
+    public  void connectServer(User user, boolean var) {
         try {
             Log.d("sss","s");
+            if(var){
+                flag=1;
+            }
             new RetrieveMessages(getContext()).execute(user.getUserID(), user.getPassword());
         }
         catch(Exception e){}
@@ -276,8 +285,14 @@ public class TabSentMailFragment extends Fragment {
                         System.in));
 
                 // retrieve the messages from the folder in an array and print it
-                Message[] messages = emailFolder.getMessages();
+                Calendar c = Calendar.getInstance();
 
+                c.add(Calendar.MONTH, getMessageDate);
+
+                SearchTerm newerThan = new ReceivedDateTerm(ComparisonTerm.GT, c.getTime());
+                Message[] messages;
+
+                messages = emailFolder.search(newerThan);
                 ArrayList<Message> m = new ArrayList<Message>();
                 messages = reverse(messages, messages.length);
 
