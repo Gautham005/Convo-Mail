@@ -77,7 +77,7 @@ public class TabPrimaryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         flag = 0;
         fl = false;
-        getMessageDate=-2;
+        getMessageDate=-5;
         Toast t = Toast.makeText(getContext(), "Please click on sync button to get new messages", Toast.LENGTH_LONG);
         t.show();
         View rootview = inflater.inflate(R.layout.fragment_primary, container, false);
@@ -300,7 +300,7 @@ public class TabPrimaryFragment extends Fragment {
                 // retrieve the messages from the folder in an array and print it
                 Message[] messages;
 
-                messages = emailFolder.search(newerThan);
+                messages = emailFolder.getMessages();
 
 
                 //                String tempDate, tempSubject, tempHeader, tempFrom;
@@ -347,7 +347,7 @@ public class TabPrimaryFragment extends Fragment {
             super.onPreExecute();
 //            progressDialog = ProgressDialog.show(this.context,"Retrieving messages","Please wait...",false,false);
 
-            if(flag==2){
+            if(flag==1){
                 spinner.setVisibility(View.VISIBLE);
 
             }
@@ -356,7 +356,7 @@ public class TabPrimaryFragment extends Fragment {
         protected  void onPostExecute(Inbox inbox) {
 
 //            progressDialog.dismiss();
-if(flag==2) {
+if(flag==1) {
     spinner.setVisibility(View.GONE);
 
 }

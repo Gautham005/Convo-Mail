@@ -11,9 +11,13 @@ import android.os.Bundle;
 import android.net.wifi.hotspot2.pps.Credential;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.AppCompatCheckBox;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.view.View;
 import android.content.Context;
@@ -43,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
     int auth = -1;
     ProgressBar spinner;
     String uname, nname, pass;
+    private AppCompatCheckBox checkbox;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,7 +73,21 @@ public class MainActivity extends AppCompatActivity {
             password = (EditText) findViewById(R.id.PassID);
             remember_me = findViewById(R.id.checkBox);
             login = (Button) findViewById(R.id.btnLogin);
+            checkbox = (AppCompatCheckBox) findViewById(R.id.checkBox1);
+            checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                    if (!isChecked) {
+                        // show password
+                        password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                    } else {
+                        // hide password
+                        password.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                    }
+                }
+            });
         }
+
     }
 
     public void launchEmailList(View view) {
