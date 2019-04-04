@@ -300,7 +300,7 @@ public class TabPrimaryFragment extends Fragment {
                 // retrieve the messages from the folder in an array and print it
                 Message[] messages;
 
-                messages = emailFolder.getMessages();
+                messages = emailFolder.search(newerThan);
 
 
                 //                String tempDate, tempSubject, tempHeader, tempFrom;
