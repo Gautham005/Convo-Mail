@@ -63,16 +63,16 @@ public class MainActivity extends AppCompatActivity {
             in.putExtra("first", "false");
             startActivity(in);
         } else {
-            name = (EditText) findViewById(R.id.NameID);
-            email = (EditText) findViewById(R.id.EmailID);
-            password = (EditText) findViewById(R.id.PassID);
+            name = findViewById(R.id.NameID);
+            email = findViewById(R.id.EmailID);
+            password = findViewById(R.id.PassID);
             remember_me = findViewById(R.id.checkBox);
-            login = (Button) findViewById(R.id.btnLogin);
-            checkbox = (AppCompatCheckBox) findViewById(R.id.checkBox1);
+            login = findViewById(R.id.btnLogin);
+            checkbox = findViewById(R.id.checkBox1);
             checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                    if (!isChecked) {
+                    if (isChecked) {
                         // show password
                         password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
                     } else {
