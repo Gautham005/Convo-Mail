@@ -15,11 +15,11 @@ public class ComposeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_compose);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        EditText from = (EditText) findViewById(R.id.from);
-        EditText to = (EditText) findViewById(R.id.to);
-        EditText subject = (EditText) findViewById(R.id.subject);
-        EditText compose = (EditText) findViewById(R.id.compose);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        EditText from = findViewById(R.id.from);
+        EditText to = findViewById(R.id.to);
+        EditText subject = findViewById(R.id.subject);
+        EditText compose = findViewById(R.id.compose);
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -27,10 +27,9 @@ public class ComposeActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Intent a = new Intent(Intent.ACTION_MAIN);
-        a.addCategory(Intent.CATEGORY_HOME);
-        a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(a);
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
     @Override

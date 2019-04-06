@@ -6,10 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.method.ScrollingMovementMethod;
@@ -38,7 +35,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.search.SearchTerm;
 
-public class EmailDetailView extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class EmailDetailView extends AppCompatActivity {
     TextView fromAddress;
     TextView subject;
     TextView content;
@@ -67,21 +64,11 @@ public class EmailDetailView extends AppCompatActivity implements NavigationView
             is.close();
             fis.close();
             Log.d("User", user.getUserID());
-            Toolbar toolbar = (Toolbar) findViewById(R.id.tool_bar1);
+            Toolbar toolbar = findViewById(R.id.tool_bar1);
             setSupportActionBar(toolbar);
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
-            drawer = (DrawerLayout) findViewById(R.id.drawer_layout1);
-            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-            drawer.addDrawerListener(toggle);
-            toggle.syncState();
-            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view1);
-            navigationView.setNavigationItemSelectedListener(this);
-            View header = navigationView.getHeaderView(0);
-            TextView uname = (TextView) header.findViewById(R.id.UserName);
-            TextView email = (TextView) header.findViewById(R.id.UserEmail);
-            uname.setText(user.getName());
-            email.setText(user.getUserID());
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
             if (fileName.contains("Primary")) {
                 m = user.inbox.getPrimary().getMessages().get(pos);
             } else if (fileName.contains("Draft")) {
@@ -96,7 +83,7 @@ public class EmailDetailView extends AppCompatActivity implements NavigationView
             msgno = m.getMsgno();
             InternetAddress person = (InternetAddress)m.getFromAddress()[0];
             fromAddress = findViewById(R.id.fromAddr);
-            subject = (TextView) findViewById(R.id.subject);
+            subject = findViewById(R.id.subject);
 
             date = findViewById(R.id.date1);
             date.setText(month[m.getDate().getMonth()]+ " " +  m.getDate().getDate() +" "+ (m.getDate().getYear()+1900));
@@ -110,7 +97,7 @@ public class EmailDetailView extends AppCompatActivity implements NavigationView
     }
 
     void setMail(String content1) {
-        content = (TextView) findViewById(R.id.content);
+        content = findViewById(R.id.content);
         content.setMovementMethod(new ScrollingMovementMethod());
         content.setVisibility(View.VISIBLE);
         content.setText(content1);
@@ -121,18 +108,18 @@ public class EmailDetailView extends AppCompatActivity implements NavigationView
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout1);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+
+        MenuItem menuItem = menu.findItem(R.id.sync1);
+        menuItem.setVisible(false);
         return true;
     }
 
@@ -146,29 +133,17 @@ public class EmailDetailView extends AppCompatActivity implements NavigationView
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        } else if (id == android.R.id.home) {
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        SharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        SharedPreferences.Editor editor = SharedPreferences.edit();
-        int id = item.getItemId();
 
-        if (id == R.id.nav_sign_out) {
-            editor.remove("name");
-            editor.apply();
-            startActivity(new Intent(this, MainActivity.class));
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
     class RetrieveContent extends AsyncTask<String, Void, String>{
         private Context context;
         private ProgressDialog progressDialog;

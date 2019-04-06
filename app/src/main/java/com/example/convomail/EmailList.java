@@ -65,11 +65,11 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         tsp.setArguments(b);
         tt.setArguments(b);
         setContentView(R.layout.activity_email_list);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.tool_bar);
+        Toolbar toolbar = findViewById(R.id.tool_bar);
         setSupportActionBar(toolbar);
 
-        viewPager = (ViewPager) findViewById(R.id.viewPager);
-        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        viewPager = findViewById(R.id.viewPager);
+        tabLayout = findViewById(R.id.tabLayout);
         adapter = new TabAdapter(getSupportFragmentManager());
         adapter.addFragment(tp, "Primary");
         adapter.addFragment(tsm, "Sent Mail");
@@ -79,19 +79,19 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         viewPager.setOffscreenPageLimit(5);
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         View header = navigationView.getHeaderView(0);
-        TextView uname = (TextView) header.findViewById(R.id.UserName);
-        TextView email = (TextView) header.findViewById(R.id.UserEmail);
+        TextView uname = header.findViewById(R.id.UserName);
+        TextView email = header.findViewById(R.id.UserEmail);
         uname.setText(name);
         email.setText(username);
         if(bo.equals("true")){
@@ -112,7 +112,7 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
     }
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -126,6 +126,9 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+
+        MenuItem menuItem = menu.findItem(R.id.sync1);
+        menuItem.setVisible(true);
         return true;
     }
 
@@ -170,7 +173,7 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
             startActivity(new Intent(this, MainActivity.class));
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }

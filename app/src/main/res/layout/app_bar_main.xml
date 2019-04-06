@@ -26,52 +26,16 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:tabMode="scrollable"
+            app:tabGravity="center"
             app:layout_collapseMode="pin"
             app:layout_scrollFlags="scroll|enterAlways"
-            app:tabGravity="fill"
+            app:tabMode="fixed"
             app:tabIndicatorColor="#0064A0"
             app:tabIndicatorHeight="4dp"
             android:background="@color/colorPrimary"
             app:tabSelectedTextColor="@color/selectedTab"
             app:tabTextColor="@color/white">
-            <!--app:tabTextAppearance="@style/MyCustomTabText">-->
 
-            <!--<android.support.design.widget.TabItem-->
-                <!--android:id="@+id/tabItem1"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:text="Compose" />-->
-
-            <!--<android.support.design.widget.TabItem-->
-                <!--android:id="@+id/tabItem2"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:text="Inbox" />-->
-
-            <!--<android.support.design.widget.TabItem-->
-                <!--android:id="@+id/tabItem3"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:text="Sent" />-->
-
-            <!--<android.support.design.widget.TabItem-->
-                <!--android:id="@+id/tabItem4"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:text="Drafts" />-->
-
-            <!--<android.support.design.widget.TabItem-->
-                <!--android:id="@+id/tabItem5"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:text="Spam" />-->
-
-            <!--<android.support.design.widget.TabItem-->
-                <!--android:id="@+id/tabItem6"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:text="Trash" />-->
 
         </android.support.design.widget.TabLayout>
     </android.support.design.widget.AppBarLayout>
