@@ -75,7 +75,7 @@ public class TabPrimaryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         flag = 0;
         fl = false;
-        getMessageDate=-5;
+        getMessageDate = -2;
         Toast t = Toast.makeText(getContext(), "Please click on sync button to get new messages", Toast.LENGTH_LONG);
         t.show();
         View rootview = inflater.inflate(R.layout.fragment_primary, container, false);
@@ -119,7 +119,7 @@ public class TabPrimaryFragment extends Fragment {
                 header.add(tempHeader);
             }
             adapter = new ArrayAdapter<String>(getContext(), R.layout.dataview, R.id.TextView, header);
-            list = (ListView) rootview.findViewById(R.id.PrimaryList);
+            list = rootview.findViewById(R.id.PrimaryList);
             list.setAdapter(adapter);
             list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -176,7 +176,7 @@ public class TabPrimaryFragment extends Fragment {
             user.setInbox(inbox);
 //            user.saveData(this);
             adapter = new ArrayAdapter<String>(getContext(), R.layout.dataview, R.id.TextView ,header);
-            list = (ListView) getView().findViewById(R.id.PrimaryList);
+            list = getView().findViewById(R.id.PrimaryList);
             list.setAdapter(adapter);
             FileOutputStream fos = getContext().openFileOutput(fileName, Context.MODE_PRIVATE);
             ObjectOutputStream os = new ObjectOutputStream(fos);
