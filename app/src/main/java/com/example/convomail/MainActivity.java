@@ -1,32 +1,27 @@
 package com.example.convomail;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.net.wifi.hotspot2.pps.Credential;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.view.View;
-import android.content.Context;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Properties;
 
 import javax.mail.AuthenticationFailedException;
@@ -200,11 +195,6 @@ public class MainActivity extends AppCompatActivity {
                 Store store = emailSession.getStore("imaps");
                 store.connect(host, strings[0], strings[1]);
 
-                // create the folder object and open it
-                Folder[] f = store.getDefaultFolder().list();
-                for (int i = 0; i < f.length; i++) {
-                    Log.d("Folder", f[i].toString());
-                }
 
                 Folder emailFolder = store.getFolder(this.getFold(strings[0]));
                 emailFolder.open(Folder.READ_ONLY);

@@ -3,7 +3,6 @@ package com.example.convomail;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -39,9 +38,7 @@ import javax.mail.search.SearchTerm;
 
 public class TabDraftFragment extends Fragment {
     static ArrayList<String> header = new ArrayList<String>();
-    String body = "";
     private User user;
-    Intent newIntent;
     private ListView list;
     private ArrayAdapter<String> adapter=null;
     private ProgressBar spinner;
@@ -52,7 +49,6 @@ public class TabDraftFragment extends Fragment {
     InternetAddress person;
     Boolean fl = true;
     int getMessageDate;
-    public SharedPreferences SharedPreferences;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         flag = 0;
@@ -77,9 +73,7 @@ public class TabDraftFragment extends Fragment {
             header.clear();
             String tempSubject, tempHeader, tempFrom;
             for (int i = 0; i < inbox.getDraft().getMessages().size(); i++) {
-                tempDate = null;
-                tempSubject = "";
-                tempHeader = "";
+
                 tempDate = inbox.getDraft().getMessages().get(i).getDate();
 
                 tempSubject = inbox.getDraft().getMessages().get(i).getSubject();
@@ -117,7 +111,6 @@ public class TabDraftFragment extends Fragment {
         } catch (Exception e) {
             Log.d("cacDraft", e.toString());
         }
-//        connectServer(user);
         setRetainInstance(true);
 
         return rootview;
@@ -140,9 +133,7 @@ public class TabDraftFragment extends Fragment {
             Date tempDate;
             String  tempSubject, tempHeader, tempFrom;
             for (int i = 0; i < inbox.getDraft().getMessages().size(); i++) {
-                tempDate = null;
-                tempSubject = "";
-                tempHeader = "";
+
                 tempDate = inbox.getDraft().getMessages().get(i).getDate();
                 tempSubject = inbox.getDraft().getMessages().get(i).getSubject();
                 if (tempSubject == null) {
@@ -261,11 +252,6 @@ public class TabDraftFragment extends Fragment {
                 Store store = emailSession.getStore("imaps");
                 store.connect(host, strings[0], strings[1]);
 
-                // create the folder object and open it
-                Folder[] f = store.getDefaultFolder().list();
-                for(int i=0;i<f.length;i++){
-                    Log.d("Folder", f[i].toString());
-                }
 
                 Folder emailFolder = store.getFolder(this.getFold(strings[0]));
                 emailFolder.open(Folder.READ_ONLY);

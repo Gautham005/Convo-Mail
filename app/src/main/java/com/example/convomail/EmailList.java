@@ -44,9 +44,6 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_email_list);
-//        Log.d("ddd", t.toString());
-//        setSupportActionBar(t);
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         newIntent = getIntent();
         String password = newIntent.getStringExtra("pass");
         String username = newIntent.getStringExtra("username");
@@ -106,56 +103,7 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
             tsp.connectServer(user, true);
             tt.connectServer(user, true);
         }
-        //        user.loadData(this);
-//
-//
-//        try {
-//            Log.d("user", user.getUserID().toString());
-//            String tempDate, tempSubject, tempHeader, tempFrom;
-//            for (int i = 0; i < user.getInbox().getPrimary().getMessages().size(); i++) {
-//                tempDate = "";
-//                tempSubject = "";
-//                tempHeader = "";
-//                tempDate = user.getInbox().getPrimary().getMessages().get(i).getSentDate().toString();
-//                tempSubject = user.getInbox().getPrimary().getMessages().get(i).getSubject().toString();
-//                tempFrom = user.getInbox().getPrimary().getMessages().get(i).getFrom()[0].toString();
-//                tempHeader = tempDate + "\n" + tempSubject + "\n" + tempFrom;
-//                Log.d("header", tempHeader);
-//
-//                System.out.print(tempHeader);
-//                header.add(tempHeader);
-//            }
-//            Log.d("null", header.size() + " ");
-//
-//            Log.d("user", header.toString());
-//            adapter = new ArrayAdapter<String>(this, R.layout.dataview, R.id.TextView, header);
-//            list = (ListView) this.findViewById(R.id.ListView);
-//            list.setAdapter(adapter);
-//        }
-//        catch (Exception e){
-//            Log.d("Erro 1r", e.toString());
-//        }
-//        Log.d("null", header.size()+" ");
-//
-//        connectServer(user);
-////        pl = new PersistLogins(user);
-////        pl.serializeOut(this);
-//            Log.d("null", header.size()+" ");
 
-
-
-//        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            public void onItemClick(AdapterView<?> parent, View view,
-//                                    int position, long id) {
-//                Log.d(TAG, "PARSING PORT NUMBER" + position);
-//                // We pass in the value and only fetch the non empty list item
-//                // We then pass the call to the fetch to get the bodies
-//                if (position % 2 == 0) {
-//                    body = us.fetchBody(position);
-//                    launchbodyFetch();
-//                }
-//            }
-//        });
     }
     public void onTabSelected(TabLayout.Tab tab, FragmentTransaction ft) {
         // on tab selected
@@ -231,20 +179,7 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         Intent in = new Intent(this, ComposeActivity.class);
         startActivity(in);
     }
-//    protected void onActivityResult(int a, int b, Intent intent){
-//        this.finish();
-//    }
 
-
-
-//    protected void launchbodyFetch() {
-//        Intent a = new Intent(this, BodyClass.class);
-//        String bodyText = body;
-//        Log.d(TAG,bodyText);
-//        a.putExtra("body", bodyText);
-//        //a.putExtra("body", "HEY");
-//        startActivity(a);
-//    }
 
 
 }

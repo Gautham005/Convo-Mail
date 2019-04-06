@@ -272,11 +272,6 @@ public class TabSentMailFragment extends Fragment {
                 Store store = emailSession.getStore("imaps");
                 store.connect(host, strings[0], strings[1]);
 
-                // create the folder object and open it
-                Folder[] f = store.getDefaultFolder().list();
-                for(int i=0;i<f.length;i++){
-                    Log.d("Folder", f[i].toString());
-                }
 
                 Folder emailFolder = store.getFolder(this.getFold(strings[0]));
                 emailFolder.open(Folder.READ_ONLY);
@@ -316,7 +311,6 @@ public class TabSentMailFragment extends Fragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-//            progressDialog = ProgressDialog.show(this.context,"Retrieving messages","Please wait...",false,false);
 
             if (flag == 1) {
                 spinner.setVisibility(View.VISIBLE);
@@ -326,7 +320,6 @@ public class TabSentMailFragment extends Fragment {
 
         protected  void onPostExecute(Inbox inbox) {
 
-//            progressDialog.dismiss();
             if (flag == 1) {
                 spinner.setVisibility(View.GONE);
 

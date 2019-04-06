@@ -5,9 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +33,5 @@ public class TabAdapter extends FragmentStatePagerAdapter {
     public int getCount() {
         return mFragmentList.size();
     }
-//    public View getTabView(int position) {
-//
-//        View view = LayoutInflater.from(context).inflate(R.layout.fragment_primary, null);
-//        return view;
-//    }
+
 }

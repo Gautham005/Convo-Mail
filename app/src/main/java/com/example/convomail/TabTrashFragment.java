@@ -3,7 +3,6 @@ package com.example.convomail;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -38,19 +37,15 @@ import javax.mail.search.ReceivedDateTerm;
 import javax.mail.search.SearchTerm;
 
 public class TabTrashFragment extends Fragment {
-    public static final String PREFS_NAME = "myPrefsFile";
 
     public static String fileName;
-    public SharedPreferences SharedPreferences;
     int flag = 0;
     InternetAddress person;
     Boolean fl = true;
     private String[] month = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
     static ArrayList<String> header = new ArrayList<String>();
-    String body = "";
     private User user;
-    Intent newIntent;
     private ListView list;
     private ArrayAdapter<String> adapter=null;
     private ProgressBar spinner;
@@ -272,11 +267,6 @@ class RetrieveMessages extends AsyncTask<String, Void, Inbox> {
             Store store = emailSession.getStore("imaps");
             store.connect(host, strings[0], strings[1]);
 
-            // create the folder object and open it
-            Folder[] f = store.getDefaultFolder().list();
-            for(int i=0;i<f.length;i++){
-                Log.d("Folder", f[i].toString());
-            }
 
             Folder emailFolder = store.getFolder(this.getFold(strings[0]));
             emailFolder.open(Folder.READ_ONLY);
@@ -316,7 +306,6 @@ class RetrieveMessages extends AsyncTask<String, Void, Inbox> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-//            progressDialog = ProgressDialog.show(this.context,"Retrieving messages","Please wait...",false,false);
 
         if (flag == 1) {
             spinner.setVisibility(View.VISIBLE);
@@ -326,7 +315,6 @@ class RetrieveMessages extends AsyncTask<String, Void, Inbox> {
 
     protected  void onPostExecute(Inbox inbox) {
 
-//            progressDialog.dismiss();
         if (flag == 1) {
             spinner.setVisibility(View.GONE);
 

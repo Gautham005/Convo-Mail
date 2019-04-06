@@ -17,11 +17,9 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -100,9 +98,7 @@ public class TabPrimaryFragment extends Fragment {
             header.clear();
             String tempSubject, tempHeader, tempFrom;
             for (int i = 0; i < inbox.getPrimary().getMessages().size(); i++) {
-                tempDate = null;
-                tempSubject = "";
-                tempHeader = "";
+
                 tempDate = inbox.getPrimary().getMessages().get(i).getDate();
 
                 tempSubject = inbox.getPrimary().getMessages().get(i).getSubject();
@@ -141,7 +137,6 @@ public class TabPrimaryFragment extends Fragment {
         }catch (Exception e){
             Log.d("cacPri", e.toString());
         }
-//        connectServer(user);
         setRetainInstance(true);
         return rootview;
 
@@ -153,10 +148,7 @@ public class TabPrimaryFragment extends Fragment {
             Date tempDate;
             String tempSubject, tempHeader, tempFrom;
             for (int i = 0; i < inbox.getPrimary().getMessages().size(); i++) {
-                tempDate = null;
-                tempSubject = "";
-                tempHeader = "";
-                tempFrom="";
+
                 tempDate = inbox.getPrimary().getMessages().get(i).getDate();
 
                 tempSubject = inbox.getPrimary().getMessages().get(i).getSubject();
@@ -275,18 +267,12 @@ public class TabPrimaryFragment extends Fragment {
                 Properties properties = this.getProp(strings[0]);
 
                 Session emailSession = Session.getDefaultInstance(properties);
-                // emailSession.setDebug(true);
                 Log.d("nnn", "ss");
 
                 // create the POP3 store object and connect with the pop server
                 Store store = emailSession.getStore("imaps");
                 store.connect(host, strings[0], strings[1]);
 
-                // create the folder object and open it
-                Folder[] f = store.getDefaultFolder().list();
-                for(int i=0;i<f.length;i++){
-                    Log.d("Folder", f[i].toString());
-                }
 
                 Folder emailFolder = store.getFolder(this.getFold(strings[0]));
                 emailFolder.open(Folder.READ_ONLY);
@@ -303,21 +289,6 @@ public class TabPrimaryFragment extends Fragment {
                 messages = emailFolder.search(newerThan);
 
 
-                //                String tempDate, tempSubject, tempHeader, tempFrom;
-//                for (int i = messages.length-1; i >=0; i--) {
-//                    tempDate = "";
-//                    tempSubject = "";
-//                    temp
-//                    tempHeader = "";
-//                    tempDate = messages[i].getSentDate().toString();
-//                    tempSubject = messages[i].getSubject();
-////                    tempFrom = messages[i].getFrom()[0].toString();
-//                    tempHeader = tempDate + "\n" + tempSubject + "\n" + tempFrom;
-//                    Log.d("header", tempHeader);
-//
-//                    System.out.print(tempHeader);
-////                    header.add(tempHeader);
-//                }
                 ArrayList<Message> m = new ArrayList<Message>();
                 messages = reverse(messages, messages.length);
 

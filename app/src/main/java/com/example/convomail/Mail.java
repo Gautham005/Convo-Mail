@@ -15,8 +15,5 @@ public class Mail implements Serializable {
     public ArrayList<Message> getMessages(){
         return Messages;
     }
-//    public String toString(){
-//        ArrayList<String> m = new ArrayList<String>();
-//        for( )
-//    }
+
 }

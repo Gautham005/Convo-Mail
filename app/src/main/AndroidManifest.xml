@@ -20,7 +20,6 @@
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity android:name=".ComposeActivity" />
         <activity android:name=".dataview" />
-        <activity android:name=".BodyClass" />
         <activity
             android:name=".EmailList"
             android:theme="@style/MyToolbarTheme" />
