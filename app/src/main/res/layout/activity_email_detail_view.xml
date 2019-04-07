@@ -3,7 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/MyToolbarTheme">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:theme="@style/MyToolbarTheme"
+    tools:context="com.example.convomail.EmailDetailView">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar"
@@ -81,6 +83,14 @@
         android:textSize="17sp"
         android:visibility="gone" />
 
+    <Button
+        android:id="@+id/attachment"
+        android:layout_width="169dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/content"
+        android:onClick="viewAttachment"
+        android:text="View Attachment"
+        android:visibility="gone" />
     <ProgressBar
         android:id="@+id/progressBar2"
         style="?android:attr/progressBarStyleLarge"

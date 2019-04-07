@@ -1,9 +1,8 @@
 package com.example.convomail;
 
-import android.util.Log;
-
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 
 import javax.mail.Address;
@@ -17,27 +16,11 @@ public class Message implements Serializable {
     String subject;
     String content;
     String contentType;
+    ArrayList<String> attachmentFileList;
+    ArrayList<String> attachmentFileType;
+    boolean downloaded;
     int msgno;
-    Message(Address fromAddress[], Date d, String s, Object c, String contentType){
-        this.fromAddress = fromAddress;
-        this.date = d;
-        this.contentType = contentType;
-        this.subject = s;
-        if(s==null){
-            this.subject = "(No subject)";
-        }
-        try{
-            if(contentType == "text/plain"){
-                this.content = c.toString();
-            }
-            else{
-                MimeMultipart contentmsg = (MimeMultipart) c;
-                this.content = getTextFromMimeMultipart(contentmsg);
-            }
-        }catch (Exception e){
-            Log.d("ERr", e.toString());
-        }
-    }
+
     Message(Address fromAddress[], Date d, String s, int msgno, String contentType){
         this.fromAddress = fromAddress;
         this.date = d;
@@ -46,6 +29,7 @@ public class Message implements Serializable {
         this.msgno = msgno;if(s==null){
             this.subject = "(No subject)";
         }
+        downloaded = false;
     }
     int getMsgno(){
         return msgno;
@@ -66,7 +50,12 @@ public class Message implements Serializable {
         return contentType;
     }
 
-
+    void setMessage(String content, ArrayList<String> f, ArrayList<String> type) {
+        this.content = content;
+        this.attachmentFileList = f;
+        this.attachmentFileType = type;
+        downloaded = true;
+    }
     private String getTextFromMimeMultipart(
             MimeMultipart mimeMultipart)  throws MessagingException, IOException {
         String result = "";

@@ -53,9 +53,6 @@ public class TabPrimaryFragment extends Fragment {
     InternetAddress person;
     Boolean fl = true;
     int getMessageDate;
-    public static String getSpace() {
-        return "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
-    }
 
     public void connectServer(User user, boolean var) {
         try {
@@ -75,8 +72,9 @@ public class TabPrimaryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         flag = 0;
         fl = false;
-        getMessageDate = -2;
-        Toast t = Toast.makeText(getContext(), "Please click on sync button to get new messages", Toast.LENGTH_LONG);
+        getMessageDate = -2
+        ;
+        Toast t = Toast.makeText(getContext(), "Please click on sync button to get new messages", Toast.LENGTH_SHORT);
         t.show();
         View rootview = inflater.inflate(R.layout.fragment_primary, container, false);
         list = rootview.findViewById(R.id.PrimaryList);
