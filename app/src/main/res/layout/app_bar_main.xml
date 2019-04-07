@@ -30,7 +30,7 @@
             app:layout_collapseMode="pin"
             app:layout_scrollFlags="scroll|enterAlways"
             app:tabMode="fixed"
-            app:tabIndicatorColor="#0064A0"
+            app:tabIndicatorColor="#E4E8EB"
             app:tabIndicatorHeight="4dp"
             android:background="@color/colorPrimary"
             app:tabSelectedTextColor="@color/selectedTab"

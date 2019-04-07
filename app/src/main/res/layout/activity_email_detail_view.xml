@@ -54,7 +54,7 @@
 
         <TextView
             android:id="@+id/fromAddr"
-            android:layout_width="100dp"
+            android:layout_width="105dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.20"
             android:padding="4dp"
@@ -64,7 +64,7 @@
 
         <TextView
             android:id="@+id/date1"
-            android:layout_width="10dp"
+            android:layout_width="5dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.1"
             android:padding="20dp"

@@ -116,7 +116,7 @@ public class EmailDetailView extends AppCompatActivity {
             if (m.downloaded) {
                 this.fileName = m.attachmentFileList;
                 this.fileContentType = m.attachmentFileType;
-                setMail(m.content);
+                setMail(m.content, 0);
             } else {
                 if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -154,16 +154,26 @@ public class EmailDetailView extends AppCompatActivity {
 
     }
 
-    void setMail(String content1) {
-        content = findViewById(R.id.content);
-        content.setMovementMethod(new ScrollingMovementMethod());
-        content.setVisibility(View.VISIBLE);
-        content.setText(content1);
-        m.setMessage(content1, fileName, fileContentType);
-        user.getInbox().getPrimary().getMessages().get(pos).setMessage(content1, fileName, fileContentType);
-        saveToFile();
-        if (!fileName.isEmpty()) {
-            b.setVisibility(View.VISIBLE);
+    void setMail(String content1, int type) {
+        if (type == 1) {
+            content = findViewById(R.id.content);
+            content.setMovementMethod(new ScrollingMovementMethod());
+            content.setVisibility(View.VISIBLE);
+            content.setText(content1);
+            if (!fileName.isEmpty()) {
+                m.setMessage(content1, fileName, fileContentType);
+                user.getInbox().getPrimary().getMessages().get(pos).setMessage(content1, fileName, fileContentType);
+                saveToFile();
+                b.setVisibility(View.VISIBLE);
+            }
+        } else {
+            content = findViewById(R.id.content);
+            content.setMovementMethod(new ScrollingMovementMethod());
+            content.setVisibility(View.VISIBLE);
+            content.setText(content1);
+            if (!fileName.isEmpty()) {
+                b.setVisibility(View.VISIBLE);
+            }
         }
 
     }
@@ -212,12 +222,12 @@ public class EmailDetailView extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-    }
+//    @Override
+//    public void onBackPressed() {
+//        Intent intent = new Intent(this, EmailList.class);
+//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+//        startActivity(intent);
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -240,7 +250,7 @@ public class EmailDetailView extends AppCompatActivity {
         if (id == R.id.action_settings) {
             return true;
         } else if (id == android.R.id.home) {
-            Intent intent = new Intent(this, MainActivity.class);
+            Intent intent = new Intent(this, EmailList.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }
@@ -495,7 +505,7 @@ public class EmailDetailView extends AppCompatActivity {
 
             spinner.setVisibility(View.GONE);
 
-            setMail(c);
+            setMail(c, 1);
         }
     }
 }
