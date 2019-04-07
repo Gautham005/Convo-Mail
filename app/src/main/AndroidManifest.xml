@@ -15,7 +15,7 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".PDFViewActivity"></activity>
+        <activity android:name=".PDFViewActivity" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -32,7 +32,6 @@
             android:label="@string/title_activity_email_detail_view"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".ComposeActivity" />
-        <activity android:name=".dataview" />
         <activity
             android:name=".EmailList"
             android:theme="@style/MyToolbarTheme" />

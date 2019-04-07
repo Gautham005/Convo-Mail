@@ -48,8 +48,8 @@
             android:layout_height="match_parent"
             android:layout_weight="0.09"
             android:contentDescription="@string/todo"
-            android:scaleX="1"
-            android:scaleY="1"
+            android:scaleX="0.8"
+            android:scaleY="0.8"
             app:srcCompat="@mipmap/person" />
 
         <TextView
@@ -89,7 +89,7 @@
         android:layout_height="50dp"
         android:layout_below="@+id/content"
         android:onClick="viewAttachment"
-        android:text="View Attachment"
+        android:text="@string/view_attachment"
         android:visibility="gone" />
     <ProgressBar
         android:id="@+id/progressBar2"

@@ -17,4 +17,5 @@
     <string name="todo">TODO</string>
     <string name="date">date</string>
     <string name="content">Content</string>
+    <string name="view_attachment">View Attachment</string>
 </resources>
