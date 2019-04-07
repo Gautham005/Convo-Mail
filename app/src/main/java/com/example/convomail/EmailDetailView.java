@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -17,22 +18,28 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.jsoup.Jsoup;
+import com.sun.mail.util.BASE64DecoderStream;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Properties;
 
 import javax.mail.AuthenticationFailedException;
-import javax.mail.BodyPart;
 import javax.mail.Folder;
+import javax.mail.Multipart;
+import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMultipart;
 import javax.mail.search.SearchTerm;
 
 public class EmailDetailView extends AppCompatActivity {
@@ -90,7 +97,7 @@ public class EmailDetailView extends AppCompatActivity {
             fromAddress.setText(person.getAddress());
 
             subject.setText(m.getSubject());
-            new RetrieveContent().execute(user.getUserID(), user.getPassword());
+            new RetrieveContent(getApplicationContext()).execute(user.getUserID(), user.getPassword());
         }catch (Exception e){
             Log.d("Error", e.toString());
         }
@@ -147,6 +154,10 @@ public class EmailDetailView extends AppCompatActivity {
     class RetrieveContent extends AsyncTask<String, Void, String>{
         private Context context;
         private ProgressDialog progressDialog;
+
+        public RetrieveContent(Context c) {
+            this.context = c;
+        }
         private String getHost(String user){
             String[]s = user.split("@");
             Properties properties = new Properties();
@@ -158,24 +169,116 @@ public class EmailDetailView extends AppCompatActivity {
             }
             return "";
         }
+
+        public String writePart(Part p) throws Exception {
+
+
+            System.out.println("----------------------------");
+            System.out.println("CONTENT-TYPE: " + p.getContentType());
+
+            //check if the content is plain text
+            if (p.isMimeType("text/plain")) {
+                System.out.println("This is plain text");
+                System.out.println("---------------------------");
+                System.out.println((String) p.getContent());
+                return (String) p.getContent();
+            }
+            //check if the content has attachment
+            else if (p.isMimeType("multipart/*")) {
+                System.out.println("This is a Multipart");
+                System.out.println("---------------------------");
+                Multipart mp = (Multipart) p.getContent();
+                int count = mp.getCount();
+                String res = "";
+                for (int i = 0; i < count; i++)
+                    res = res + writePart(mp.getBodyPart(i));
+                return res;
+            }
+            //check if the content is a nested message
+            else if (p.isMimeType("message/rfc822")) {
+                System.out.println("This is a Nested Message");
+                System.out.println("---------------------------");
+                String res = writePart((Part) p.getContent());
+                return res;
+            }
+            // check if the content is an inline image
+            else if (p.isMimeType("image/jpeg")) {
+                System.out.println("--------> image/jpeg");
+                Object o = p.getContent();
+
+                InputStream x = (InputStream) o;
+                // Construct the required byte array
+                int i = 0;
+                byte[] bArray = new byte[x.available()];
+                System.out.println("x.length = " + x.available());
+                while ((i = x.available()) > 0) {
+                    int result = (x.read(bArray));
+                    if (result == -1)
+                        i = 0;
+
+                    break;
+                }
+                FileOutputStream f2 = new FileOutputStream(new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "image.jpg"));
+                f2.write(bArray);
+                return "";
+            } else if (p.getContentType().contains("image/")) {
+                System.out.println("content type" + p.getContentType());
+                File f = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "image" + new Date().getTime() + ".jpg");
+                DataOutputStream output = new DataOutputStream(
+                        new BufferedOutputStream(new FileOutputStream(f)));
+                BASE64DecoderStream test =
+                        (BASE64DecoderStream) p
+                                .getContent();
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = test.read(buffer)) != -1) {
+                    output.write(buffer, 0, bytesRead);
+
+                }
+                return "";
+            } else {
+                Object o = p.getContent();
+                if (o instanceof String) {
+                    System.out.println("This is a string");
+                    System.out.println("---------------------------");
+                    System.out.println((String) o);
+                    return "";
+                } else if (o instanceof InputStream) {
+                    System.out.println("This is just an input stream");
+                    System.out.println("---------------------------");
+                    InputStream is = (InputStream) o;
+                    is = (InputStream) o;
+                    int c;
+                    while ((c = is.read()) != -1)
+                        System.out.write(c);
+                } else {
+                    System.out.println("This is an unknown type");
+                    System.out.println("---------------------------");
+                    System.out.println(o.toString());
+                    return o.toString();
+                }
+            }
+            return "";
+        }
+
         private String getTextFromMessage(javax.mail.Message message) throws Exception {
             if (message.isMimeType("text/plain")){
                 return message.getContent().toString();
             }else if (message.isMimeType("multipart/*")) {
-                String result = "";
-                MimeMultipart mimeMultipart = (MimeMultipart)message.getContent();
-                int count = mimeMultipart.getCount();
-                for (int i = 0; i < count; i ++){
-                    BodyPart bodyPart = mimeMultipart.getBodyPart(i);
-                    if (bodyPart.isMimeType("text/plain")){
-                        result = result + "\n" + bodyPart.getContent();
-                        break;  //without break same text appears twice in my tests
-                    } else if (bodyPart.isMimeType("text/html")){
-                        String html = (String) bodyPart.getContent();
-                        result = result + "\n" + Jsoup.parse(html).text();
-
-                    }
-                }
+                String result = writePart(message);
+//                MimeMultipart mimeMultipart = (MimeMultipart)message.getContent();
+//                int count = mimeMultipart.getCount();
+//                for (int i = 0; i < count; i ++){
+//                    BodyPart bodyPart = mimeMultipart.getBodyPart(i);
+//                    if (bodyPart.isMimeType("text/plain")){
+//                        result = result + "\n" + bodyPart.getContent();
+//                        break;  //without break same text appears twice in my tests
+//                    } else if (bodyPart.isMimeType("text/html")){
+//                        String html = (String) bodyPart.getContent();
+//                        result = result + "\n" + Jsoup.parse(html).text();
+//
+//                    }
+//                }
                 return result;
             }
             return "";
@@ -212,7 +315,7 @@ public class EmailDetailView extends AppCompatActivity {
 
         @Override
         protected String  doInBackground(String... strings) {
-            Inbox inbox = new Inbox(new Mail(new ArrayList<Message>()), new Mail(new ArrayList<com.example.convomail.Message>()), new Mail(new ArrayList<com.example.convomail.Message>()), new Mail(new ArrayList<com.example.convomail.Message>()));
+            Inbox inbox = new Inbox(new Mail(new ArrayList<Message>()), new Mail(new ArrayList<Message>()), new Mail(new ArrayList<Message>()), new Mail(new ArrayList<Message>()));
             javax.mail.Message messages=null;
             Object c=null;
             String s=null;
