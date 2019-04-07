@@ -104,7 +104,7 @@ public class TabSentMailFragment extends Fragment {
                 header.add(tempHeader);
             }
             adapter = new ArrayAdapter<String>(getContext(), R.layout.dataview, R.id.TextView, header);
-            list = (ListView) rootview.findViewById(R.id.SentMailList);
+            list = rootview.findViewById(R.id.SentMailList);
             list.setAdapter(adapter);
             list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -119,6 +119,7 @@ public class TabSentMailFragment extends Fragment {
 
         } catch (FileNotFoundException e) {
             fl = false;
+            flag = 1;
         } catch (Exception e) {
             Log.d("cacSM", e.toString());
         }
@@ -175,7 +176,7 @@ public class TabSentMailFragment extends Fragment {
 //            Log.d("size", h.get(0));
             user.setInbox(inbox);
 //            user.saveData(this);
-            list = (ListView) getView().findViewById(R.id.SentMailList);
+            list = getView().findViewById(R.id.SentMailList);
 
             adapter = new ArrayAdapter<String>(getContext(), R.layout.dataview, R.id.TextView ,header);
             list.setAdapter(adapter);

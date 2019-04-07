@@ -97,7 +97,7 @@ public class TabTrashFragment extends Fragment {
                 header.add(tempHeader);
             }
             adapter = new ArrayAdapter<String>(getContext(), R.layout.dataview, R.id.TextView, header);
-            list = (ListView) rootview.findViewById(R.id.TrashMailList);
+            list = rootview.findViewById(R.id.TrashMailList);
             list.setAdapter(adapter);
             list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -112,6 +112,7 @@ public class TabTrashFragment extends Fragment {
 
         } catch (FileNotFoundException e) {
             fl = false;
+            flag = 1;
         } catch (Exception e) {
             Log.d("cacTrash", e.toString());
         }
@@ -171,7 +172,7 @@ public class TabTrashFragment extends Fragment {
             user.setInbox(inbox);
 //            user.saveData(this);
             adapter = new ArrayAdapter<String>(getContext(), R.layout.dataview, R.id.TextView ,header);
-            list = (ListView) getView().findViewById(R.id.TrashMailList);
+            list = getView().findViewById(R.id.TrashMailList);
             list.setAdapter(adapter);
             FileOutputStream fos = getContext().openFileOutput(fileName, Context.MODE_PRIVATE);
             ObjectOutputStream os = new ObjectOutputStream(fos);

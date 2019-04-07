@@ -162,7 +162,17 @@ public class EmailDetailView extends AppCompatActivity {
             content.setText(content1);
             if (!fileName.isEmpty()) {
                 m.setMessage(content1, fileName, fileContentType);
-                user.getInbox().getPrimary().getMessages().get(pos).setMessage(content1, fileName, fileContentType);
+                if (fileName1.contains("Primary")) {
+                    user.inbox.getPrimary().getMessages().get(pos).setMessage(content1, fileName, fileContentType);
+                } else if (fileName1.contains("Draft")) {
+                    user.inbox.getDraft().getMessages().get(pos).setMessage(content1, fileName, fileContentType);
+                } else if (fileName1.contains("Spam")) {
+                    user.inbox.getSpam().getMessages().get(pos).setMessage(content1, fileName, fileContentType);
+                } else if (fileName1.contains("Trash")) {
+                    user.inbox.getTrash().getMessages().get(pos).setMessage(content1, fileName, fileContentType);
+                } else if (fileName1.contains("SentMail")) {
+                    user.inbox.getSentMail().getMessages().get(pos).setMessage(content1, fileName, fileContentType);
+                }
                 saveToFile();
                 b.setVisibility(View.VISIBLE);
             }
@@ -181,53 +191,73 @@ public class EmailDetailView extends AppCompatActivity {
     void viewAttachment(View view) {
 
 
-        String tempfile, tempcont;
-        File file;
-        Context context;
-        CharSequence text;
-        Toast toast = Toast.makeText(getApplicationContext(), "Attachments saved to downloads folder", Toast.LENGTH_SHORT);
-        for (int i = 0; i < fileName.size(); i++) {
-            tempfile = fileName.get(i);
-            file = new File(tempfile);
-            tempcont = fileContentType.get(i);
-            Log.d("error", tempcont);
-            if (tempcont.contains("APPLICATION/PDF")) {
-                Intent intent = new Intent(this, PDFViewActivity.class);
-                intent.putExtra("fileName", tempfile);
-                Log.d("file", tempfile);
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                startActivity(intent);
-            } else if (tempcont.contains("APPLICATION/VND.")) {
-                Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_VIEW);
-                Uri apkURI = FileProvider.getUriForFile(
-                        this,
-                        this.getApplicationContext()
-                                .getPackageName() + ".provider", file);
-                intent.setDataAndType(apkURI, "application/msword");
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                startActivity(intent);
-            } else {
-                Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_VIEW);
-                Uri apkURI = FileProvider.getUriForFile(
-                        this,
-                        this.getApplicationContext()
-                                .getPackageName() + ".provider", file);
-                intent.setDataAndType(apkURI, tempcont);
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                startActivity(intent);
+        try {
+            String tempfile, tempcont;
+            File file;
+            Context context;
+            CharSequence text;
+            Toast toast = Toast.makeText(getApplicationContext(), "Attachments saved to downloads folder", Toast.LENGTH_SHORT);
+            for (int i = 0; i < fileName.size(); i++) {
+                tempfile = fileName.get(i);
+                file = new File(tempfile);
+                tempcont = fileContentType.get(i);
+                Log.d("error", tempcont);
+                if (tempcont.contains("APPLICATION/PDF")) {
+                    Intent intent = new Intent(this, PDFViewActivity.class);
+                    intent.putExtra("fileName", tempfile);
+                    Log.d("file", tempfile);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    startActivity(intent);
+                } else if (tempcont.contains("APPLICATION/VND.")) {
+                    Intent intent = new Intent();
+                    intent.setAction(Intent.ACTION_VIEW);
+                    Uri apkURI = FileProvider.getUriForFile(
+                            this,
+                            this.getApplicationContext()
+                                    .getPackageName() + ".provider", file);
+                    intent.setDataAndType(apkURI, "application/msword");
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent();
+                    intent.setAction(Intent.ACTION_VIEW);
+                    Uri apkURI = FileProvider.getUriForFile(
+                            this,
+                            this.getApplicationContext()
+                                    .getPackageName() + ".provider", file);
+                    intent.setDataAndType(apkURI, tempcont);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(intent);
+                }
             }
+        } catch (Exception e) {
+            if (fileName1.contains("Primary")) {
+                user.inbox.getPrimary().getMessages().get(pos).setFalse();
+            } else if (fileName1.contains("Draft")) {
+                user.inbox.getDraft().getMessages().get(pos).setFalse();
+            } else if (fileName1.contains("Spam")) {
+                user.inbox.getSpam().getMessages().get(pos).setFalse();
+            } else if (fileName1.contains("Trash")) {
+                user.inbox.getTrash().getMessages().get(pos).setFalse();
+            } else if (fileName1.contains("SentMail")) {
+                user.inbox.getSentMail().getMessages().get(pos).setFalse();
+            }
+            Intent i = getIntent();
+            startActivity(i);
         }
     }
 
-//    @Override
-//    public void onBackPressed() {
-//        Intent intent = new Intent(this, EmailList.class);
-//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-//        startActivity(intent);
-//    }
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, EmailList.class);
+        intent.putExtra("Name", user.getName());
+        intent.putExtra("username", user.getUserID());
+        intent.putExtra("pass", user.getPassword());
+        intent.putExtra("first", "false");
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -251,6 +281,10 @@ public class EmailDetailView extends AppCompatActivity {
             return true;
         } else if (id == android.R.id.home) {
             Intent intent = new Intent(this, EmailList.class);
+            intent.putExtra("Name", user.getName());
+            intent.putExtra("username", user.getUserID());
+            intent.putExtra("pass", user.getPassword());
+            intent.putExtra("first", "false");
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }

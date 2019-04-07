@@ -56,6 +56,10 @@ public class Message implements Serializable {
         this.attachmentFileType = type;
         downloaded = true;
     }
+
+    void setFalse() {
+        downloaded = false;
+    }
     private String getTextFromMimeMultipart(
             MimeMultipart mimeMultipart)  throws MessagingException, IOException {
         String result = "";

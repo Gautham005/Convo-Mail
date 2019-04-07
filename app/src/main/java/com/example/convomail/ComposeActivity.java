@@ -27,7 +27,7 @@ public class ComposeActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, EmailList.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }
@@ -59,7 +59,7 @@ public class ComposeActivity extends AppCompatActivity {
             return true;
         } else if (id == android.R.id.home) {
             // todo: goto back activity from here
-            Intent intent = new Intent(this, MainActivity.class);
+            Intent intent = new Intent(this, EmailList.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             return true;

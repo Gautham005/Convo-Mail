@@ -79,7 +79,7 @@ public class TabPrimaryFragment extends Fragment {
         View rootview = inflater.inflate(R.layout.fragment_primary, container, false);
         list = rootview.findViewById(R.id.PrimaryList);
         ArrayList<String> s = getArguments().getStringArrayList("auth");
-        Log.d("nnn", s.get(1));
+        Log.d("nnn", s.get(0));
         user = new User(s.get(1), s.get(2), s.get(0));
         spinner = rootview.findViewById(R.id.progressBar1);
         setHasOptionsMenu(true);
@@ -329,6 +329,7 @@ if(flag==1) {
     spinner.setVisibility(View.GONE);
 
 }
+            flag = 0;
 setInbox(inbox);
 }
 
