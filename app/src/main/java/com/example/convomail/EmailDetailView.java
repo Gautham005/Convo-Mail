@@ -24,6 +24,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sun.mail.util.BASE64DecoderStream;
 
@@ -172,12 +173,14 @@ public class EmailDetailView extends AppCompatActivity {
 
         String tempfile, tempcont;
         File file;
+        Context context;
+        CharSequence text;
+        Toast toast = Toast.makeText(getApplicationContext(), "Attachments saved to downloads folder", Toast.LENGTH_SHORT);
         for (int i = 0; i < fileName.size(); i++) {
             tempfile = fileName.get(i);
             file = new File(tempfile);
             tempcont = fileContentType.get(i);
             Log.d("error", tempcont);
-
             if (tempcont.contains("APPLICATION/PDF")) {
                 Intent intent = new Intent(this, PDFViewActivity.class);
                 intent.putExtra("fileName", tempfile);
