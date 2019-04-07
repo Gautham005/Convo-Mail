@@ -185,6 +185,16 @@ public class EmailDetailView extends AppCompatActivity {
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(intent);
+            } else if (tempcont.contains("APPLICATION/VND.")) {
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_VIEW);
+                Uri apkURI = FileProvider.getUriForFile(
+                        this,
+                        this.getApplicationContext()
+                                .getPackageName() + ".provider", file);
+                intent.setDataAndType(apkURI, "application/msword");
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(intent);
             } else {
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_VIEW);
