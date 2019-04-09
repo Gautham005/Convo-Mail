@@ -450,10 +450,31 @@ public class EmailDetailView extends AppCompatActivity {
             String[] s = user.split("@");
 
             if(s[1].equals("gmail.com")){
-                return "INBOX";
+
+                if (fileName1.contains("Primary")) {
+                    return "INBOX";
+                } else if (fileName1.contains("Draft")) {
+                    return "[Gmail]/Drafts";
+                } else if (fileName1.contains("Spam")) {
+                    return "[Gmail]/Spam";
+                } else if (fileName1.contains("Trash")) {
+                    return "[Gmail]/Trash";
+                } else if (fileName1.contains("SentMail")) {
+                    return "[Gmail]/Sent Mail";
+                }
             }
             else if(s[1].equals("outlook.com")){
-                return "INBOX" ;
+                if (fileName1.contains("Primary")) {
+                    return "INBOX";
+                } else if (fileName1.contains("Draft")) {
+                    return "Drafts";
+                } else if (fileName1.contains("Spam")) {
+                    return "Junk";
+                } else if (fileName1.contains("Trash")) {
+                    return "Deleted";
+                } else if (fileName1.contains("SentMail")) {
+                    return "Sent";
+                }
             }
             return "";
         }

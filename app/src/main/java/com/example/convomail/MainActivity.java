@@ -24,7 +24,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Properties;
 
-import javax.mail.AuthenticationFailedException;
 import javax.mail.Folder;
 import javax.mail.Session;
 import javax.mail.Store;
@@ -211,12 +210,9 @@ public class MainActivity extends AppCompatActivity {
                     store.close();
                 }
 
-            } catch (AuthenticationFailedException e) {
-                Log.d("log", "!1");
-                return true;
             } catch (Exception e) {
                 Log.d("err", e.toString());
-
+                return true;
             }
             return false;
         }
