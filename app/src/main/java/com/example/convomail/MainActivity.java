@@ -1,6 +1,5 @@
 package com.example.convomail;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -24,7 +23,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Properties;
 
-import javax.mail.Folder;
 import javax.mail.Session;
 import javax.mail.Store;
 
@@ -134,7 +132,6 @@ public class MainActivity extends AppCompatActivity {
 
     class AuthCheckerTask extends AsyncTask<String, Void, Boolean> {
         private Context context;
-        ProgressDialog progressDialog;
 
         AuthCheckerTask(Context c) {
             this.context = c;
@@ -169,16 +166,6 @@ public class MainActivity extends AppCompatActivity {
             return properties;
         }
 
-        private String getFold(String user) {
-            String[] s = user.split("@");
-
-            if (s[1].equals("gmail.com")) {
-                return "[Gmail]/Trash";
-            } else if (s[1].equals("outlook.com")) {
-                return "Deleted";
-            }
-            return "";
-        }
 
         @Override
         protected Boolean doInBackground(String... strings) {
@@ -195,17 +182,17 @@ public class MainActivity extends AppCompatActivity {
                 store.connect(host, strings[0], strings[1]);
 
 
-                Folder emailFolder = store.getFolder(this.getFold(strings[0]));
-                emailFolder.open(Folder.READ_ONLY);
+//                Folder emailFolder = store.getFolder(this.getFold(strings[0]));
+//                emailFolder.open(Folder.READ_ONLY);
 
                 BufferedReader reader = new BufferedReader(new InputStreamReader(
                         System.in));
 
                 // retrieve the messages from the folder in an array and print it
 
-                if (emailFolder != null) {
-                    emailFolder.close(false);
-                }
+//                if (emailFolder != null) {
+//                    emailFolder.close(false);
+//                }
                 if (store != null) {
                     store.close();
                 }

@@ -49,7 +49,7 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         String username = newIntent.getStringExtra("username");
         String name = newIntent.getStringExtra("Name");
         String bo = newIntent.getStringExtra("first");
-
+        bo = "true";
         fileName = username+password+"Primary";
         ArrayList<String> s = new ArrayList<>();
         s.add(name);
@@ -180,6 +180,9 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
 
     public void Compose(View view) {
         Intent in = new Intent(this, ComposeActivity.class);
+        in.putExtra("Name", user.getName());
+        in.putExtra("username", user.getUserID());
+        in.putExtra("pass", user.getPassword());
         startActivity(in);
     }
 

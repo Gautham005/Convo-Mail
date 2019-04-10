@@ -1,26 +1,56 @@
 package com.example.convomail;
 
+import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.Properties;
+
+import javax.mail.Authenticator;
+import javax.mail.BodyPart;
+import javax.mail.Message;
+import javax.mail.Multipart;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 public class ComposeActivity extends AppCompatActivity {
-
+    Intent newIntent;
+    TextView from = null;
+    EditText to = null;
+    EditText subject = null;
+    EditText compose = null;
+    User user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_compose);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        EditText from = findViewById(R.id.from);
-        EditText to = findViewById(R.id.to);
-        EditText subject = findViewById(R.id.subject);
-        EditText compose = findViewById(R.id.compose);
+        from = findViewById(R.id.from);
+        newIntent = getIntent();
 
+        String password = newIntent.getStringExtra("pass");
+        String username = newIntent.getStringExtra("username");
+        String name = newIntent.getStringExtra("Name");
+        from.setText(username);
+        to = findViewById(R.id.to);
+        subject = findViewById(R.id.subject);
+        compose = findViewById(R.id.compose);
+        user = new User(username, password, name);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
@@ -50,8 +80,10 @@ public class ComposeActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             return true;
         } else if (id == R.id.send) {
-            Snackbar.make(this.findViewById(R.id.send), "Send", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
+            SendMail();
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
             return true;
         } else if (id == R.id.attach) {
             Snackbar.make(this.findViewById(R.id.attach), "Attach a file", Snackbar.LENGTH_LONG)
@@ -65,5 +97,126 @@ public class ComposeActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void SendMail() {
+        String toAddress = to.getText().toString();
+        String subject1 = subject.getText().toString();
+        String messagebody = compose.getText().toString();
+        new SendMailTask(this.getApplicationContext()).execute(user.getUserID(), user.getPassword(), toAddress, subject1, messagebody);
+
+    }
+
+    protected void onPostExceute(Boolean b) {
+        if (b) {
+            Toast.makeText(this, "Message sent", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "Message sending failed", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    class SendMailTask extends AsyncTask<String, Void, Boolean> {
+        Context context;
+
+        SendMailTask(Context context) {
+            this.context = context;
+        }
+
+        private String getHost(String user) {
+            String[] s = user.split("@");
+            Properties properties = new Properties();
+            if (s[1].equals("gmail.com")) {
+                return "smtp.gmail.com";
+            } else if (s[1].equals("outlook.com")) {
+                return "smtp.office365.com";
+            }
+            return "";
+        }
+
+        private Properties getProp(String user) {
+            String[] s = user.split("@");
+            Properties properties = new Properties();
+            if (s[1].equals("gmail.com")) {
+                properties.put("mail.smtp.host", this.getHost(user));
+                properties.put("mail.smtp.socketFactory.port", "587");
+                properties.put("mail.smtp.port", "587");
+                properties.put("mail.smtp.auth", "true");
+                properties.put("mail.smtp.starttls.enable", "true");
+            } else if (s[1].equals("outlook.com")) {
+                properties.put("mail.smtp.host", this.getHost(user));
+                properties.put("mail.smtp.socketFactory.port", "465");
+                properties.put("mail.smtp.port", "465");
+                properties.put("mail.smtp.auth", "true");
+            }
+            return properties;
+        }
+
+        protected Boolean doInBackground(String... strings) {
+            // Recipient's email ID needs to be mentioned.
+            String to = strings[2];
+
+
+            final String username = strings[0];
+            final String password = strings[1];
+
+            // Assuming you are sending email through relay.jangosmtp.net
+            String host = this.getHost(strings[0]);
+            Properties properties = this.getProp(strings[0]);
+
+            // Get the Session object.
+            Session session = Session.getInstance(properties,
+                    new Authenticator() {
+                        protected PasswordAuthentication getPasswordAuthentication() {
+                            return new PasswordAuthentication(username, password);
+                        }
+                    });
+
+            try {
+                // Create a default MimeMessage object.
+                Message message = new MimeMessage(session);
+
+                // Set From: header field of the header.
+                message.setFrom(new InternetAddress(username));
+
+                // Set To: header field of the header.
+                message.setRecipients(Message.RecipientType.TO,
+                        InternetAddress.parse(to));
+
+                // Set Subject: header field
+                message.setSubject(strings[3]);
+
+                // Create the message part
+                BodyPart messageBodyPart = new MimeBodyPart();
+
+                // Now set the actual message
+                messageBodyPart.setText(strings[4]);
+
+                // Create a multipar message
+                Multipart multipart = new MimeMultipart();
+
+                // Set text message part
+                multipart.addBodyPart(messageBodyPart);
+
+                // Part two is attachment
+//                messageBodyPart = new MimeBodyPart();
+//                String filename = "/home/manisha/file.txt";
+//                DataSource source = new FileDataSource(filename);
+//                messageBodyPart.setDataHandler(new DataHandler(source));
+//                messageBodyPart.setFileName(filename);
+//                multipart.addBodyPart(messageBodyPart);
+
+                // Send the complete message parts
+                message.setContent(multipart);
+
+                // Send message
+                Transport.send(message);
+
+                System.out.println("Sent message successfully....");
+                return true;
+            } catch (Exception e) {
+                Log.d("SendError", e.toString());
+                return false;
+            }
+        }
     }
 }
