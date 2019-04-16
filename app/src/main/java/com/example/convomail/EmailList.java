@@ -129,6 +129,8 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
 
         MenuItem menuItem = menu.findItem(R.id.sync1);
         menuItem.setVisible(true);
+        menuItem = menu.findItem(R.id.deletebtn);
+        menuItem.setVisible(false);
         return true;
     }
 

@@ -44,6 +44,7 @@ import java.util.Date;
 import java.util.Properties;
 
 import javax.mail.AuthenticationFailedException;
+import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Multipart;
 import javax.mail.Part;
@@ -133,7 +134,7 @@ public class EmailDetailView extends AppCompatActivity {
                 } else {
                     // Permission has already been granted
                 }
-                new RetrieveContent(getApplicationContext()).execute(user.getUserID(), user.getPassword());
+                new RetrieveContent(getApplicationContext()).execute(user.getUserID(), user.getPassword(), "GetMessage");
             }
         }catch (Exception e){
             Log.d("Error", e.toString());
@@ -266,6 +267,8 @@ public class EmailDetailView extends AppCompatActivity {
 
         MenuItem menuItem = menu.findItem(R.id.sync1);
         menuItem.setVisible(false);
+        menuItem = menu.findItem(R.id.deletebtn);
+        menuItem.setVisible(true);
         return true;
     }
 
@@ -287,6 +290,90 @@ public class EmailDetailView extends AppCompatActivity {
             intent.putExtra("first", "false");
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
+        } else if (id == R.id.deletebtn) {
+            new RetrieveContent(this).execute(user.getUserID(), user.getPassword(), "Delete");
+            FileInputStream fis = null;
+            try {
+                fis = getApplicationContext().openFileInput(fileName1);
+                ObjectInputStream is = new ObjectInputStream(fis);
+                User userNew = (User) is.readObject();
+                is.close();
+                fis.close();
+                ArrayList<Message> m = new ArrayList<>();
+                if (fileName1.contains("Primary")) {
+                    for (Message j : userNew.getInbox().getPrimary().getMessages()) {
+                        if (j.getMsgno() != msgno) {
+                            m.add(j);
+                        }
+                    }
+                    userNew.getInbox().getPrimary().setMessages(m);
+                    FileOutputStream fos = getApplicationContext().openFileOutput(fileName1, Context.MODE_PRIVATE);
+                    ObjectOutputStream os = new ObjectOutputStream(fos);
+                    os.writeObject(userNew);
+                    os.close();
+                    fos.close();
+
+                } else if (fileName1.contains("Draft")) {
+                    for (Message j : userNew.getInbox().getDraft().getMessages()) {
+                        if (j.getMsgno() != msgno) {
+                            m.add(j);
+                        }
+                    }
+                    userNew.getInbox().getDraft().setMessages(m);
+                    FileOutputStream fos = getApplicationContext().openFileOutput(fileName1, Context.MODE_PRIVATE);
+                    ObjectOutputStream os = new ObjectOutputStream(fos);
+                    os.writeObject(userNew);
+                    os.close();
+                    fos.close();
+                } else if (fileName1.contains("Spam")) {
+                    for (Message j : userNew.getInbox().getSpam().getMessages()) {
+                        if (j.getMsgno() != msgno) {
+                            m.add(j);
+                        }
+                    }
+                    userNew.getInbox().getSpam().setMessages(m);
+                    FileOutputStream fos = getApplicationContext().openFileOutput(fileName1, Context.MODE_PRIVATE);
+                    ObjectOutputStream os = new ObjectOutputStream(fos);
+                    os.writeObject(userNew);
+                    os.close();
+                    fos.close();
+                } else if (fileName1.contains("Trash")) {
+                    for (Message j : userNew.getInbox().getTrash().getMessages()) {
+                        if (j.getMsgno() != msgno) {
+                            m.add(j);
+                        }
+                    }
+                    userNew.getInbox().getTrash().setMessages(m);
+                    FileOutputStream fos = getApplicationContext().openFileOutput(fileName1, Context.MODE_PRIVATE);
+                    ObjectOutputStream os = new ObjectOutputStream(fos);
+                    os.writeObject(userNew);
+                    os.close();
+                    fos.close();
+                } else if (fileName1.contains("SentMail")) {
+                    for (Message j : userNew.getInbox().getSentMail().getMessages()) {
+                        if (j.getMsgno() != msgno) {
+                            m.add(j);
+                        }
+                    }
+                    userNew.getInbox().getSentMail().setMessages(m);
+                    FileOutputStream fos = getApplicationContext().openFileOutput(fileName1, Context.MODE_PRIVATE);
+                    ObjectOutputStream os = new ObjectOutputStream(fos);
+                    os.writeObject(userNew);
+                    os.close();
+                    fos.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Toast.makeText(this, "Message deleted", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, EmailList.class);
+            intent.putExtra("Name", user.getName());
+            intent.putExtra("username", user.getUserID());
+            intent.putExtra("pass", user.getPassword());
+            intent.putExtra("first", "false");
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -479,6 +566,20 @@ public class EmailDetailView extends AppCompatActivity {
             return "";
         }
 
+        private String getFold(String user, String t) {
+            String[] s = user.split("@");
+
+            if (s[1].equals("gmail.com")) {
+
+
+                return "[Gmail]/Trash";
+
+            } else if (s[1].equals("outlook.com")) {
+
+                return "Deleted";
+            }
+            return "";
+        }
         @Override
         protected String  doInBackground(String... strings) {
             Inbox inbox = new Inbox(new Mail(new ArrayList<Message>()), new Mail(new ArrayList<Message>()), new Mail(new ArrayList<Message>()), new Mail(new ArrayList<Message>()));
@@ -511,11 +612,6 @@ public class EmailDetailView extends AppCompatActivity {
                 store = emailSession.getStore("imaps");
                 store.connect(host, strings[0], strings[1]);
 
-                // create the folder object and open it
-                Folder[] f = store.getDefaultFolder().list();
-                for(int i=0;i<f.length;i++){
-                    Log.d("Folder", f[i].toString());
-                }
 
                 emailFolder = store.getFolder(this.getFold(strings[0]));
                 emailFolder.open(Folder.READ_WRITE);
@@ -526,7 +622,19 @@ public class EmailDetailView extends AppCompatActivity {
                 // retrieve the messages from the folder in an array and print it
 
                 messages = emailFolder.getMessage(msgno);
+                javax.mail.Message m[] = new javax.mail.Message[1];
+                m[0] = messages;
+                if (strings[2].equals("Delete")) {
+                    Folder trashFolder = store.getFolder(getFold(strings[0], "Trash"));
+                    trashFolder.open(Folder.READ_WRITE);
+                    messages.setFlag(Flags.Flag.DELETED, true);
+                    System.out.println("Message Deleted");
+                    emailFolder.copyMessages(m, trashFolder);
+                    System.out.println("Message Deleted");
+
+                }
                 s = getTextFromMessage(messages);
+
                 if(emailFolder!=null){
                     emailFolder.close(false);
                 }

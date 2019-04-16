@@ -18,10 +18,13 @@ import java.util.Properties;
 
 import javax.mail.Authenticator;
 import javax.mail.BodyPart;
+import javax.mail.Flags;
+import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.Multipart;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
+import javax.mail.Store;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
@@ -57,7 +60,15 @@ public class ComposeActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        if (to.getText() != null && subject.getText() != null && compose.getText() != null) {
+            SendMail("Draft");
+        }
+        // Showing Alert Message
         Intent intent = new Intent(this, EmailList.class);
+        intent.putExtra("Name", user.getName());
+        intent.putExtra("username", user.getUserID());
+        intent.putExtra("pass", user.getPassword());
+        intent.putExtra("first", "false");
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }
@@ -80,7 +91,7 @@ public class ComposeActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             return true;
         } else if (id == R.id.send) {
-            SendMail();
+            SendMail("Send");
             Intent intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
@@ -91,7 +102,16 @@ public class ComposeActivity extends AppCompatActivity {
             return true;
         } else if (id == android.R.id.home) {
             // todo: goto back activity from here
+
+            if (to.getText() != null && subject.getText() != null && compose.getText() != null) {
+                SendMail("Draft");
+            }
+            // Showing Alert Message
             Intent intent = new Intent(this, EmailList.class);
+            intent.putExtra("Name", user.getName());
+            intent.putExtra("username", user.getUserID());
+            intent.putExtra("pass", user.getPassword());
+            intent.putExtra("first", "false");
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             return true;
@@ -99,11 +119,11 @@ public class ComposeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void SendMail() {
+    public void SendMail(String inp) {
         String toAddress = to.getText().toString();
         String subject1 = subject.getText().toString();
         String messagebody = compose.getText().toString();
-        new SendMailTask(this.getApplicationContext()).execute(user.getUserID(), user.getPassword(), toAddress, subject1, messagebody);
+        new SendMailTask(this.getApplicationContext()).execute(user.getUserID(), user.getPassword(), toAddress, subject1, messagebody, inp);
 
     }
 
@@ -151,6 +171,16 @@ public class ComposeActivity extends AppCompatActivity {
             return properties;
         }
 
+        private String getFold(String user) {
+            String[] s = user.split("@");
+
+            if (s[1].equals("gmail.com")) {
+                return "[Gmail]/Drafts";
+            } else if (s[1].equals("outlook.com")) {
+                return "Drafts";
+            }
+            return "";
+        }
         protected Boolean doInBackground(String... strings) {
             // Recipient's email ID needs to be mentioned.
             String to = strings[2];
@@ -173,7 +203,7 @@ public class ComposeActivity extends AppCompatActivity {
 
             try {
                 // Create a default MimeMessage object.
-                Message message = new MimeMessage(session);
+                MimeMessage message = new MimeMessage(session);
 
                 // Set From: header field of the header.
                 message.setFrom(new InternetAddress(username));
@@ -208,10 +238,23 @@ public class ComposeActivity extends AppCompatActivity {
                 // Send the complete message parts
                 message.setContent(multipart);
 
-                // Send message
-                Transport.send(message);
+                if (strings[5].equals("Send")) {
+                    // Send message
+                    Transport.send(message);
+                    System.out.println("Sent message successfully....");
 
-                System.out.println("Sent message successfully....");
+                } else {
+                    Store imapsStore = session.getStore("imaps");
+                    imapsStore.connect(host, strings[0], strings[1]);
+                    Folder draftsMailBoxFolder = imapsStore.getFolder(getFold(username));//[Gmail]/Drafts
+                    draftsMailBoxFolder.open(Folder.READ_WRITE);
+                    message.setFlag(Flags.Flag.DRAFT, true);
+                    MimeMessage draftMessages[] = {message};
+                    draftsMailBoxFolder.appendMessages(draftMessages);
+                    System.out.println("Message saved to draft");
+
+                }
+
                 return true;
             } catch (Exception e) {
                 Log.d("SendError", e.toString());
