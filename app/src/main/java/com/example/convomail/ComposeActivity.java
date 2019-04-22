@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,6 +52,7 @@ public class ComposeActivity extends AppCompatActivity {
     User user;
     int i = 0;
     RelativeLayout att1, att2;
+    ImageButton rm1, rm2;
     TextView attn1, attn2, ext;
 
     private static final int PICKFILE_RESULT_CODE = 1;
@@ -67,6 +69,8 @@ public class ComposeActivity extends AppCompatActivity {
         attn1 = findViewById(R.id.attachment_name1);
         attn2 = findViewById(R.id.attachment_name2);
         ext = findViewById(R.id.extraatt);
+        rm1 = findViewById(R.id.remove_attachment1);
+        rm2 = findViewById(R.id.remove_attachment2);
         String password = newIntent.getStringExtra("pass");
         String username = newIntent.getStringExtra("username");
         String name = newIntent.getStringExtra("Name");
@@ -77,8 +81,24 @@ public class ComposeActivity extends AppCompatActivity {
         user = new User(username, password, name);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        rm1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                RemoveAttachment();
+            }
+        });
     }
 
+    public void RemoveAttachment() {
+        fileNames.remove(0);
+        if (fileNames.isEmpty()) {
+            att1.setVisibility(View.GONE);
+        } else {
+            att1.setVisibility(View.VISIBLE);
+            attn1.setText(new File(fileNames.get(0)).getName());
+            attn1.setVisibility(View.VISIBLE);
+        }
+    }
     @Override
     public void onBackPressed() {
         if (to.getText() != null && subject.getText() != null && compose.getText() != null) {
