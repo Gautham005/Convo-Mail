@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -13,7 +14,9 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +49,10 @@ public class ComposeActivity extends AppCompatActivity {
     EditText subject = null;
     EditText compose = null;
     User user;
+    int i = 0;
+    RelativeLayout att1, att2;
+    TextView attn1, attn2, ext;
+
     private static final int PICKFILE_RESULT_CODE = 1;
     ArrayList<String> fileNames = new ArrayList<>();
     @Override
@@ -55,7 +62,11 @@ public class ComposeActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         from = findViewById(R.id.from);
         newIntent = getIntent();
-
+        att1 = findViewById(R.id.attachment1);
+        att2 = findViewById(R.id.attachment2);
+        attn1 = findViewById(R.id.attachment_name1);
+        attn2 = findViewById(R.id.attachment_name2);
+        ext = findViewById(R.id.extraatt);
         String password = newIntent.getStringExtra("pass");
         String username = newIntent.getStringExtra("username");
         String name = newIntent.getStringExtra("Name");
@@ -155,28 +166,48 @@ public class ComposeActivity extends AppCompatActivity {
             case PICKFILE_RESULT_CODE:
                 if (resultCode == RESULT_OK) {
                     String FilePath = data.getData().getPath();
-                    String[] s = new File(FilePath).getAbsolutePath().split(":");
-                    FilePath = s[1];
-                    Log.d("File", FilePath);
-                    fileNames.add(FilePath);
+                    File f = new File(FilePath);
+                    Uri u = Uri.fromFile(f);
+                    Log.d("File", f.getAbsolutePath());
+
+                    String[] s = u.getPath().split(":");
+                    if (s[1].contains("/storage/emulated/0")) {
+                        fileNames.add(s[1]);
+                    } else {
+                        fileNames.add("/storage/emulated/0/" + s[1]);
+
+                    }
+                    if (fileNames.size() == 1) {
+                        att1.setVisibility(View.VISIBLE);
+                        attn1.setText(new File(FilePath).getName());
+                        attn1.setVisibility(View.VISIBLE);
+                        i++;
+                    }
+                    if (fileNames.size() == 2) {
+                        att2.setVisibility(View.VISIBLE);
+                        attn2.setText(new File(FilePath).getName());
+                        attn2.setVisibility(View.VISIBLE);
+                        i++;
+                    } else {
+                        String str = "And " + (fileNames.size() - 2) + "more files";
+                        ext.setText(str);
+                        ext.setVisibility(View.VISIBLE);
+                    }
                 }
         }
     }
     public void SendMail(String inp) {
         String toAddress = to.getText().toString();
+        if (toAddress == null) {
+            return;
+        }
         String subject1 = subject.getText().toString();
         String messagebody = compose.getText().toString();
         new SendMailTask(this.getApplicationContext()).execute(user.getUserID(), user.getPassword(), toAddress, subject1, messagebody, inp);
 
     }
 
-    protected void onPostExceute(Boolean b) {
-        if (b) {
-            Toast.makeText(this, "Message sent", Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(this, "Message sending failed", Toast.LENGTH_SHORT).show();
-        }
-    }
+
 
     class SendMailTask extends AsyncTask<String, Void, Boolean> {
         Context context;
@@ -304,6 +335,14 @@ public class ComposeActivity extends AppCompatActivity {
             } catch (Exception e) {
                 Log.d("SendError", e.toString());
                 return false;
+            }
+        }
+
+        protected void onPostExceute(Boolean b) {
+            if (b) {
+                Toast.makeText(getApplicationContext(), "Message sent", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getApplicationContext(), "Message sending failed", Toast.LENGTH_SHORT).show();
             }
         }
     }
