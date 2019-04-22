@@ -1,10 +1,13 @@
 package com.example.convomail;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -14,8 +17,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Properties;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.mail.Authenticator;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
@@ -38,6 +46,8 @@ public class ComposeActivity extends AppCompatActivity {
     EditText subject = null;
     EditText compose = null;
     User user;
+    private static final int PICKFILE_RESULT_CODE = 1;
+    ArrayList<String> fileNames = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,8 +107,7 @@ public class ComposeActivity extends AppCompatActivity {
             startActivity(intent);
             return true;
         } else if (id == R.id.attach) {
-            Snackbar.make(this.findViewById(R.id.attach), "Attach a file", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
+            PickFile();
             return true;
         } else if (id == android.R.id.home) {
             // todo: goto back activity from here
@@ -119,6 +128,40 @@ public class ComposeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void PickFile() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 200
+            );
+
+            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+            // app-defined int constant. The callback method gets the
+            // result of the request.
+
+        } else {
+            // Permission has already been granted
+        }
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");
+        startActivityForResult(intent, PICKFILE_RESULT_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case PICKFILE_RESULT_CODE:
+                if (resultCode == RESULT_OK) {
+                    String FilePath = data.getData().getPath();
+                    String[] s = new File(FilePath).getAbsolutePath().split(":");
+                    FilePath = s[1];
+                    Log.d("File", FilePath);
+                    fileNames.add(FilePath);
+                }
+        }
+    }
     public void SendMail(String inp) {
         String toAddress = to.getText().toString();
         String subject1 = subject.getText().toString();
@@ -221,19 +264,21 @@ public class ComposeActivity extends AppCompatActivity {
                 // Now set the actual message
                 messageBodyPart.setText(strings[4]);
 
-                // Create a multipar message
+                // Create a multipart message
                 Multipart multipart = new MimeMultipart();
 
                 // Set text message part
                 multipart.addBodyPart(messageBodyPart);
+                //                        Part two is attachment
+                if (!fileNames.isEmpty()) {
+                    for (String filename : fileNames) {
 
-                // Part two is attachment
-//                messageBodyPart = new MimeBodyPart();
-//                String filename = "/home/manisha/file.txt";
-//                DataSource source = new FileDataSource(filename);
-//                messageBodyPart.setDataHandler(new DataHandler(source));
-//                messageBodyPart.setFileName(filename);
-//                multipart.addBodyPart(messageBodyPart);
+                        DataSource source = new FileDataSource(filename);
+                        messageBodyPart.setDataHandler(new DataHandler(source));
+                        messageBodyPart.setFileName(new File(filename).getName());
+                        multipart.addBodyPart(messageBodyPart);
+                    }
+                }
 
                 // Send the complete message parts
                 message.setContent(multipart);
