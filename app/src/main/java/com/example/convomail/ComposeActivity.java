@@ -1,14 +1,15 @@
 package com.example.convomail;
 
 import android.Manifest;
-import android.accounts.Account;
-import android.accounts.AccountManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -27,9 +28,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Properties;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.activation.DataHandler;
@@ -88,6 +87,7 @@ public class ComposeActivity extends AppCompatActivity {
         String name = newIntent.getStringExtra("Name");
         from.setText(username);
         to = findViewById(R.id.to);
+        to.setThreshold(1);
         subject = findViewById(R.id.subject);
         compose = findViewById(R.id.compose);
         user = new User(username, password, name);
@@ -110,6 +110,21 @@ public class ComposeActivity extends AppCompatActivity {
             compose.setText(newIntent.getStringExtra("content"));
 
         }
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_CONTACTS}, 200
+            );
+
+            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+            // app-defined int constant. The callback method gets the
+            // result of the request.
+
+        } else {
+            // Permission has already been granted
+        }
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         rm1.setOnClickListener(new View.OnClickListener() {
@@ -121,17 +136,38 @@ public class ComposeActivity extends AppCompatActivity {
         addAdapterToViews();
     }
 
-    private void addAdapterToViews() {
 
-        Account[] accounts = AccountManager.get(this).getAccounts();
-        Set<String> emailSet = new HashSet<String>();
-        for (Account account : accounts) {
-            if (EMAIL_PATTERN.matcher(account.name).matches()) {
-                emailSet.add(account.name);
-                Log.d("emails", account.name);
+    public ArrayList<String> getNameEmailDetails() {
+        ArrayList<String> names = new ArrayList<String>();
+        ContentResolver cr = getContentResolver();
+        Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+        if (cur.getCount() > 0) {
+            while (cur.moveToNext()) {
+                String id = cur.getString(cur.getColumnIndex(ContactsContract.Contacts._ID));
+                Cursor cur1 = cr.query(
+                        ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
+                        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?",
+                        new String[]{id}, null);
+                while (cur1.moveToNext()) {
+                    //to get the contact names
+                    String name = cur1.getString(cur1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                    Log.e("Name :", name);
+                    String email = cur1.getString(cur1.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+                    Log.e("Email", email);
+                    if (email != null) {
+                        names.add(email);
+                    }
+                }
+                cur1.close();
             }
         }
-        to.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, new ArrayList<String>(emailSet)));
+        return names;
+    }
+    private void addAdapterToViews() {
+        Log.d("emails", "1");
+
+
+        to.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, getNameEmailDetails()));
 
     }
     public void RemoveAttachment() {

@@ -1,12 +1,16 @@
 package com.example.convomail;
 
+import android.Manifest;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -58,7 +62,21 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         user = new User(username, password, name);
         Bundle b = new Bundle();
         b.putStringArrayList("auth",s);
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
 
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_CONTACTS}, 200
+            );
+
+            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+            // app-defined int constant. The callback method gets the
+            // result of the request.
+
+        } else {
+            // Permission has already been granted
+        }
         tp.setArguments(b);
         tsm.setArguments(b);
         td.setArguments(b);
