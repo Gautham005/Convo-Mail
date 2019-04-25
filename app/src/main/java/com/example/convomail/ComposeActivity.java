@@ -54,8 +54,11 @@ public class ComposeActivity extends AppCompatActivity {
     RelativeLayout att1, att2;
     ImageButton rm1, rm2;
     TextView attn1, attn2, ext;
-
+    String type;
+    int msgno;
     private static final int PICKFILE_RESULT_CODE = 1;
+    String folder;
+    String repl;
     ArrayList<String> fileNames = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +82,17 @@ public class ComposeActivity extends AppCompatActivity {
         subject = findViewById(R.id.subject);
         compose = findViewById(R.id.compose);
         user = new User(username, password, name);
+        type = newIntent.getStringExtra("type");
+        if (type.equals("Reply")) {
+            repl = newIntent.getStringExtra("replyto");
+            String sub = newIntent.getStringExtra("subject");
+            subject.setText("RE:" + sub);
+            to.setText(repl);
+            Log.d("repl", repl);
+            String msg = newIntent.getStringExtra("msgno");
+            msgno = Integer.parseInt(msg);
+            folder = newIntent.getStringExtra("folder");
+        }
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         rm1.setOnClickListener(new View.OnClickListener() {
@@ -228,8 +242,7 @@ public class ComposeActivity extends AppCompatActivity {
     }
 
 
-
-    class SendMailTask extends AsyncTask<String, Void, Boolean> {
+    class SendMailTask extends AsyncTask<String, Void, Integer> {
         Context context;
 
         SendMailTask(Context context) {
@@ -275,7 +288,40 @@ public class ComposeActivity extends AppCompatActivity {
             }
             return "";
         }
-        protected Boolean doInBackground(String... strings) {
+
+        private String getFold1(String user) {
+            String[] s = user.split("@");
+
+            if (s[1].equals("gmail.com")) {
+
+                if (folder.contains("Primary")) {
+                    return "INBOX";
+                } else if (folder.contains("Draft")) {
+                    return "[Gmail]/Drafts";
+                } else if (folder.contains("Spam")) {
+                    return "[Gmail]/Spam";
+                } else if (folder.contains("Trash")) {
+                    return "[Gmail]/Trash";
+                } else if (folder.contains("SentMail")) {
+                    return "[Gmail]/Sent Mail";
+                }
+            } else if (s[1].equals("outlook.com")) {
+                if (folder.contains("Primary")) {
+                    return "INBOX";
+                } else if (folder.contains("Draft")) {
+                    return "Drafts";
+                } else if (folder.contains("Spam")) {
+                    return "Junk";
+                } else if (folder.contains("Trash")) {
+                    return "Deleted";
+                } else if (folder.contains("SentMail")) {
+                    return "Sent";
+                }
+            }
+            return "";
+        }
+
+        protected Integer doInBackground(String... strings) {
             // Recipient's email ID needs to be mentioned.
             String to = strings[2];
 
@@ -298,41 +344,122 @@ public class ComposeActivity extends AppCompatActivity {
             try {
                 // Create a default MimeMessage object.
                 MimeMessage message = new MimeMessage(session);
+                if (type.equals("Compose")) {
+                    message.setRecipients(Message.RecipientType.TO,
+                            InternetAddress.parse(to));
+                    // Set From: header field of the header.
+                    message.setFrom(new InternetAddress(username));
 
-                // Set From: header field of the header.
-                message.setFrom(new InternetAddress(username));
+                    // Set To: header field of the header.
 
-                // Set To: header field of the header.
-                message.setRecipients(Message.RecipientType.TO,
-                        InternetAddress.parse(to));
+                    // Set Subject: header field
+                    message.setSubject(strings[3]);
 
-                // Set Subject: header field
-                message.setSubject(strings[3]);
+                    // Create the message part
+                    BodyPart messageBodyPart = new MimeBodyPart();
 
-                // Create the message part
-                BodyPart messageBodyPart = new MimeBodyPart();
+                    // Now set the actual message
+                    messageBodyPart.setText(strings[4]);
 
-                // Now set the actual message
-                messageBodyPart.setText(strings[4]);
+                    // Create a multipart message
+                    Multipart multipart = new MimeMultipart();
 
-                // Create a multipart message
-                Multipart multipart = new MimeMultipart();
+                    // Set text message part
+                    multipart.addBodyPart(messageBodyPart);
+                    //                        Part two is attachment
+                    if (!fileNames.isEmpty()) {
+                        for (String filename : fileNames) {
 
-                // Set text message part
-                multipart.addBodyPart(messageBodyPart);
-                //                        Part two is attachment
-                if (!fileNames.isEmpty()) {
-                    for (String filename : fileNames) {
+                            DataSource source = new FileDataSource(filename);
+                            messageBodyPart.setDataHandler(new DataHandler(source));
+                            messageBodyPart.setFileName(new File(filename).getName());
+                            multipart.addBodyPart(messageBodyPart);
+                        }
+                    }
 
-                        DataSource source = new FileDataSource(filename);
-                        messageBodyPart.setDataHandler(new DataHandler(source));
-                        messageBodyPart.setFileName(new File(filename).getName());
-                        multipart.addBodyPart(messageBodyPart);
+                    // Send the complete message parts
+                    message.setContent(multipart);
+                    if (strings[5].equals("Send")) {
+                        // Send message
+                        Transport.send(message);
+                        System.out.println("Sent message successfully....");
+
+                    } else {
+                        Store imapsStore = session.getStore("imaps");
+                        imapsStore.connect(host, strings[0], strings[1]);
+                        Folder draftsMailBoxFolder = imapsStore.getFolder(getFold(username));//[Gmail]/Drafts
+                        draftsMailBoxFolder.open(Folder.READ_WRITE);
+                        message.setFlag(Flags.Flag.DRAFT, true);
+                        MimeMessage draftMessages[] = {message};
+                        draftsMailBoxFolder.appendMessages(draftMessages);
+                        System.out.println("Message saved to draft");
+
+                    }
+                } else if (type.equals("Reply")) {
+                    Store imapsStore = session.getStore("imaps");
+                    imapsStore.connect(host, strings[0], strings[1]);
+                    Folder replyFolder = imapsStore.getFolder(getFold1(username));
+                    replyFolder.open(Folder.READ_ONLY);
+
+                    Message m = replyFolder.getMessage(msgno);
+                    String subject = m.getSubject();
+                    message = (MimeMessage) m.reply(false);
+                    message.setReplyTo(m.getReplyTo());
+                    // Set From: header field of the header.
+                    message.setFrom(new InternetAddress(username));
+
+                    // Set To: header field of the header.
+
+                    // Set Subject: header field
+                    message.setSubject(strings[3]);
+
+                    // Create the message part
+                    BodyPart messageBodyPart = new MimeBodyPart();
+
+                    // Now set the actual message
+                    messageBodyPart.setText(strings[4]);
+
+                    // Create a multipart message
+                    Multipart multipart = new MimeMultipart();
+
+                    // Set text message part
+                    multipart.addBodyPart(messageBodyPart);
+                    //                        Part two is attachment
+                    if (!fileNames.isEmpty()) {
+                        for (String filename : fileNames) {
+
+                            DataSource source = new FileDataSource(filename);
+                            messageBodyPart.setDataHandler(new DataHandler(source));
+                            messageBodyPart.setFileName(new File(filename).getName());
+                            multipart.addBodyPart(messageBodyPart);
+                        }
+                    }
+
+                    // Send the complete message parts
+                    message.setContent(multipart);
+                    if (strings[5].equals("Send")) {
+                        // Send message
+                        Transport t = session.getTransport("smtp");
+                        t.connect(strings[0], strings[1]);
+                        t.sendMessage(message, message.getAllRecipients());
+                        t.close();
+                        replyFolder.close(true);
+                        System.out.println("Sent message successfully....");
+
+                    } else {
+                        Store imapsStore1 = session.getStore("imaps");
+                        imapsStore1.connect(host, strings[0], strings[1]);
+                        Folder draftsMailBoxFolder = imapsStore.getFolder(getFold(username));//[Gmail]/Drafts
+                        draftsMailBoxFolder.open(Folder.READ_WRITE);
+                        message.setFlag(Flags.Flag.DRAFT, true);
+                        MimeMessage draftMessages[] = {message};
+                        draftsMailBoxFolder.appendMessages(draftMessages);
+                        System.out.println("Message saved to draft");
+
                     }
                 }
 
-                // Send the complete message parts
-                message.setContent(multipart);
+
 
                 if (strings[5].equals("Send")) {
                     // Send message
@@ -351,15 +478,15 @@ public class ComposeActivity extends AppCompatActivity {
 
                 }
 
-                return true;
+                return 1;
             } catch (Exception e) {
                 Log.d("SendError", e.toString());
-                return false;
+                return 0;
             }
         }
 
-        protected void onPostExceute(Boolean b) {
-            if (b) {
+        protected void onPostExecute(Integer b) {
+            if (b == 1) {
                 Toast.makeText(getApplicationContext(), "Message sent", Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(getApplicationContext(), "Message sending failed", Toast.LENGTH_SHORT).show();

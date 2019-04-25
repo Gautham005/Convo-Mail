@@ -84,11 +84,29 @@
         android:visibility="gone" />
 
     <Button
-        android:id="@+id/attachment"
+        android:id="@+id/vattachment1"
         android:layout_width="169dp"
         android:layout_height="50dp"
         android:layout_below="@+id/content"
-        android:onClick="viewAttachment"
+        android:onClick="viewAttachment1"
+        android:text="@string/view_attachment"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/vattachment2"
+        android:layout_width="169dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/vattachment1"
+        android:onClick="viewAttachment2"
+        android:text="@string/view_attachment"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/vattachment3"
+        android:layout_width="169dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/vattachment2"
+        android:onClick="viewAttachment3"
         android:text="@string/view_attachment"
         android:visibility="gone" />
     <ProgressBar
@@ -103,4 +121,10 @@
         android:scaleY="1"
         android:visibility="gone" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/vattachment3"
+        android:onClick="Reply"
+        android:title="Reply" />
 </RelativeLayout>

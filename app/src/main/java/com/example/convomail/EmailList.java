@@ -185,6 +185,7 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         in.putExtra("Name", user.getName());
         in.putExtra("username", user.getUserID());
         in.putExtra("pass", user.getPassword());
+        in.putExtra("type", "Compose");
         startActivity(in);
     }
 
