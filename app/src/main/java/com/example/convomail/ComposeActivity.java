@@ -1,6 +1,8 @@
 package com.example.convomail;
 
 import android.Manifest;
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,6 +17,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -23,7 +27,10 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -46,7 +53,6 @@ import javax.mail.internet.MimeMultipart;
 public class ComposeActivity extends AppCompatActivity {
     Intent newIntent;
     TextView from = null;
-    EditText to = null;
     EditText subject = null;
     EditText compose = null;
     User user;
@@ -54,12 +60,15 @@ public class ComposeActivity extends AppCompatActivity {
     RelativeLayout att1, att2;
     ImageButton rm1, rm2;
     TextView attn1, attn2, ext;
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}$", Pattern.CASE_INSENSITIVE);
+    AutoCompleteTextView to;
     String type;
     int msgno;
     private static final int PICKFILE_RESULT_CODE = 1;
     String folder;
     String repl;
     ArrayList<String> fileNames = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +101,14 @@ public class ComposeActivity extends AppCompatActivity {
             String msg = newIntent.getStringExtra("msgno");
             msgno = Integer.parseInt(msg);
             folder = newIntent.getStringExtra("folder");
+        } else if (type.equals("Forward")) {
+            String sub = newIntent.getStringExtra("subject");
+            subject.setText("Fwd: " + sub);
+            String msg = newIntent.getStringExtra("msgno");
+            msgno = Integer.parseInt(msg);
+            folder = newIntent.getStringExtra("folder");
+            compose.setText(newIntent.getStringExtra("content"));
+
         }
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -101,8 +118,22 @@ public class ComposeActivity extends AppCompatActivity {
                 RemoveAttachment();
             }
         });
+        addAdapterToViews();
     }
 
+    private void addAdapterToViews() {
+
+        Account[] accounts = AccountManager.get(this).getAccounts();
+        Set<String> emailSet = new HashSet<String>();
+        for (Account account : accounts) {
+            if (EMAIL_PATTERN.matcher(account.name).matches()) {
+                emailSet.add(account.name);
+                Log.d("emails", account.name);
+            }
+        }
+        to.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, new ArrayList<String>(emailSet)));
+
+    }
     public void RemoveAttachment() {
         fileNames.remove(0);
         if (fileNames.isEmpty()) {
@@ -143,9 +174,7 @@ public class ComposeActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        } else if (id == R.id.send) {
+        if (id == R.id.send) {
             SendMail("Send");
             Intent intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -393,7 +422,7 @@ public class ComposeActivity extends AppCompatActivity {
                         MimeMessage draftMessages[] = {message};
                         draftsMailBoxFolder.appendMessages(draftMessages);
                         System.out.println("Message saved to draft");
-
+                        return 2;
                     }
                 } else if (type.equals("Reply")) {
                     Store imapsStore = session.getStore("imaps");
@@ -455,28 +484,61 @@ public class ComposeActivity extends AppCompatActivity {
                         MimeMessage draftMessages[] = {message};
                         draftsMailBoxFolder.appendMessages(draftMessages);
                         System.out.println("Message saved to draft");
+                        return 2;
+                    }
+                } else if (type.contains("Forward")) {
+                    Store imapsStore2 = session.getStore("imaps");
+                    imapsStore2.connect(host, strings[0], strings[1]);
+                    Folder forwardFolder = imapsStore2.getFolder(getFold1(username));
+                    forwardFolder.open(Folder.READ_ONLY);
+                    Message m = forwardFolder.getMessage(msgno);
 
+
+                    message.setRecipients(Message.RecipientType.TO,
+                            InternetAddress.parse(to));
+                    // Set From: header field of the header.
+                    message.setFrom(new InternetAddress(username));
+
+                    // Set To: header field of the header.
+
+                    // Set Subject: header field
+                    message.setSubject(strings[3]);
+
+                    // Create the message part
+                    MimeBodyPart messageBodyForwardPart = new MimeBodyPart();
+                    // Now set the actual message
+//                    messageBodyPart.setText(strings[4]);
+                    // Create a multipart message
+                    Multipart multipart = new MimeMultipart();
+                    messageBodyForwardPart.setText("Oiginal message:\n\n");
+                    messageBodyForwardPart.setContent(m, "message/rfc822");
+                    messageBodyForwardPart.setDataHandler(m.getDataHandler());
+                    multipart.addBodyPart(messageBodyForwardPart);
+
+
+                    message.setContent(multipart);
+                    if (strings[5].equals("Send")) {
+                        // Send message
+                        Transport t = session.getTransport("smtp");
+                        t.connect(strings[0], strings[1]);
+                        t.sendMessage(message, message.getAllRecipients());
+                        t.close();
+                        forwardFolder.close(true);
+                        System.out.println("Forwarded message successfully....");
+
+                    } else {
+                        Store imapsStore = session.getStore("imaps");
+                        imapsStore.connect(host, strings[0], strings[1]);
+                        Folder draftsMailBoxFolder = imapsStore.getFolder(getFold(username));//[Gmail]/Drafts
+                        draftsMailBoxFolder.open(Folder.READ_WRITE);
+                        message.setFlag(Flags.Flag.DRAFT, true);
+                        MimeMessage draftMessages[] = {message};
+                        draftsMailBoxFolder.appendMessages(draftMessages);
+                        System.out.println("Message saved to draft");
+                        return 2;
                     }
                 }
 
-
-
-                if (strings[5].equals("Send")) {
-                    // Send message
-                    Transport.send(message);
-                    System.out.println("Sent message successfully....");
-
-                } else {
-                    Store imapsStore = session.getStore("imaps");
-                    imapsStore.connect(host, strings[0], strings[1]);
-                    Folder draftsMailBoxFolder = imapsStore.getFolder(getFold(username));//[Gmail]/Drafts
-                    draftsMailBoxFolder.open(Folder.READ_WRITE);
-                    message.setFlag(Flags.Flag.DRAFT, true);
-                    MimeMessage draftMessages[] = {message};
-                    draftsMailBoxFolder.appendMessages(draftMessages);
-                    System.out.println("Message saved to draft");
-
-                }
 
                 return 1;
             } catch (Exception e) {
@@ -488,9 +550,13 @@ public class ComposeActivity extends AppCompatActivity {
         protected void onPostExecute(Integer b) {
             if (b == 1) {
                 Toast.makeText(getApplicationContext(), "Message sent", Toast.LENGTH_LONG).show();
-            } else {
+            } else if (b == 0) {
                 Toast.makeText(getApplicationContext(), "Message sending failed", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getApplicationContext(), "Message saved to drafts", Toast.LENGTH_LONG).show();
+
             }
+
         }
     }
 }

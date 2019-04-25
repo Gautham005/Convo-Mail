@@ -22,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -74,6 +75,7 @@ public class EmailDetailView extends AppCompatActivity {
     int pos;
     String fileName1;
     String replyto;
+    LinearLayout buttonlayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,7 +97,7 @@ public class EmailDetailView extends AppCompatActivity {
             setSupportActionBar(toolbar);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
+            buttonlayout = findViewById(R.id.buttonlayout);
             if (fileName1.contains("Primary")) {
                 m = user.inbox.getPrimary().getMessages().get(pos);
             } else if (fileName1.contains("Draft")) {
@@ -106,6 +108,9 @@ public class EmailDetailView extends AppCompatActivity {
                 m = user.inbox.getTrash().getMessages().get(pos);
             } else if (fileName1.contains("SentMail")) {
                 m = user.inbox.getSentMail().getMessages().get(pos);
+            }
+            if (fileName1.contains("Primary") || fileName1.contains("SentMail")) {
+                buttonlayout.setVisibility(View.VISIBLE);
             }
             msgno = m.getMsgno();
             InternetAddress person = (InternetAddress)m.getFromAddress()[0];
@@ -334,7 +339,7 @@ public class EmailDetailView extends AppCompatActivity {
             Context context;
             CharSequence text;
             Toast toast = Toast.makeText(getApplicationContext(), "Attachments saved to downloads folder", Toast.LENGTH_SHORT);
-
+            toast.show();
             tempfile = fileName.get(2);
             file = new File(tempfile);
             tempcont = fileContentType.get(2);
@@ -356,7 +361,7 @@ public class EmailDetailView extends AppCompatActivity {
                 intent.setDataAndType(apkURI, "application/msword");
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 startActivity(intent);
-            } else {
+            } else if (tempcont.contains("image")) {
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_VIEW);
                 Uri apkURI = FileProvider.getUriForFile(
@@ -366,6 +371,8 @@ public class EmailDetailView extends AppCompatActivity {
                 intent.setDataAndType(apkURI, tempcont);
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 startActivity(intent);
+            } else {
+                Toast.makeText(this.getApplicationContext(), "Cannot open attachment.", Toast.LENGTH_SHORT).show();
             }
 
         } catch (Exception e) {
@@ -385,6 +392,18 @@ public class EmailDetailView extends AppCompatActivity {
         }
     }
 
+    public void Forward(View view) {
+        Intent in = new Intent(this, ComposeActivity.class);
+        in.putExtra("Name", user.getName());
+        in.putExtra("username", user.getUserID());
+        in.putExtra("pass", user.getPassword());
+        in.putExtra("type", "Forward");
+        in.putExtra("msgno", m.getMsgno() + "");
+        in.putExtra("subject", m.getSubject());
+        in.putExtra("folder", getFolder(user.getUserID()));
+        in.putExtra("content", content.getText() + "\n\n\n" + fileName.size() + " attachments");
+        startActivity(in);
+    }
     public void Reply(View view) {
         Intent in = new Intent(this, ComposeActivity.class);
         in.putExtra("Name", user.getName());
@@ -428,9 +447,7 @@ public class EmailDetailView extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        } else if (id == android.R.id.home) {
+        if (id == android.R.id.home) {
             Intent intent = new Intent(this, EmailList.class);
             intent.putExtra("Name", user.getName());
             intent.putExtra("username", user.getUserID());
@@ -823,13 +840,16 @@ public class EmailDetailView extends AppCompatActivity {
             super.onPreExecute();
 
                 spinner.setVisibility(View.VISIBLE);
+            buttonlayout.setVisibility(View.GONE);
 
 
         }
 
         protected  void onPostExecute(String c) {
 
-
+            if (fileName1.contains("Primary") || fileName1.contains("SentMail")) {
+                buttonlayout.setVisibility(View.VISIBLE);
+            }
             spinner.setVisibility(View.GONE);
 
             setMail(c, 1);
