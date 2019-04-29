@@ -8,13 +8,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatCheckBox;
-import android.text.method.HideReturnsTransformationMethod;
-import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -60,24 +57,24 @@ public class MainActivity extends AppCompatActivity {
             in.putExtra("first", "false");
             startActivity(in);
         } else {
-            name = findViewById(R.id.NameID);
-            email = findViewById(R.id.EmailID);
-            password = findViewById(R.id.PassID);
+            name = findViewById(R.id.name);
+            email = findViewById(R.id.userEmailId);
+            password = findViewById(R.id.password);
             remember_me = findViewById(R.id.checkBox);
-            login = findViewById(R.id.btnLogin);
-            checkbox = findViewById(R.id.checkBox1);
-            checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                    if (isChecked) {
-                        // show password
-                        password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                    } else {
-                        // hide password
-                        password.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                    }
-                }
-            });
+            login = findViewById(R.id.signUpBtn);
+//            checkbox = findViewById(R.id.checkBox1);
+//            checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//                @Override
+//                public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+//                    if (isChecked) {
+//                        // show password
+//                        password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+//                    } else {
+//                        // hide password
+//                        password.setTransformationMethod(PasswordTransformationMethod.getInstance());
+//                    }
+//                }
+//            });
         }
 
     }

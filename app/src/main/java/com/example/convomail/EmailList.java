@@ -2,6 +2,7 @@ package com.example.convomail;
 
 import android.Manifest;
 import android.app.FragmentTransaction;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -15,6 +16,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -22,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,6 +39,7 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
     private TabAdapter adapter;
     private TabLayout tabLayout;
     private ViewPager viewPager;
+    String[] emails = {"rahul123@gmail.com", "nsk77@gmail.com"};
     public static final String PREFS_NAME = "myPrefsFile";
     public static String fileName;
     public SharedPreferences SharedPreferences;
@@ -179,7 +183,7 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         SharedPreferences.Editor editor = SharedPreferences.edit();
         int id = item.getItemId();
 
-        if (id == R.id.nav_sign_out) {
+        if (id == R.id.log_out) {
             editor.remove("name");
             editor.apply();
             try {
@@ -188,6 +192,18 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
                 e.printStackTrace();
             }
             startActivity(new Intent(this, MainActivity.class));
+        } else if (id == R.id.switch_account) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(EmailList.this);
+            builder.setTitle("Manage your account")
+                    .setItems(emails, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int position) {
+                            Toast.makeText(getApplicationContext(), "Switched to new account", Toast.LENGTH_LONG).show();
+                        }
+                    });
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+        } else if (id == R.id.add_account) {
+
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);

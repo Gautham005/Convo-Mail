@@ -1,13 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:showIn="navigation_view">
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_sign_out"
-            android:title="Sign Out" />
+            android:id="@+id/switch_account"
+            android:title="@null"
+            app:actionLayout="@layout/switch_account" />
 
+        <item
+            android:id="@+id/add_account"
+            android:title="@null"
+            app:actionLayout="@layout/add_account" />
+
+        <item
+            android:id="@+id/log_out"
+            android:title="@null"
+            app:actionLayout="@layout/log_out" />
     </group>
 
 

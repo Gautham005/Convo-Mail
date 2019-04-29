@@ -6,69 +6,127 @@
     android:layout_height="match_parent"
     android:layout_gravity="center"
     android:orientation="vertical"
+    android:background="@color/white"
     android:paddingTop="50dp"
     tools:context="com.example.convomail.MainActivity">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:paddingBottom="10dp"
-        android:text="ConvoMail"
-        android:textSize="50sp" />
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="@android:color/transparent"
+        android:gravity="center"
+        android:padding="10dp"
+        android:src="@drawable/convomail" />
 
-    <EditText
-        android:id="@+id/NameID"
+    <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:autofillHints=""
-        android:ems="10"
-        android:hint="Name"
-        android:inputType="textPersonName" />
+        android:layout_below="@id/logo"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginEnd="10dp"
+        android:background="@android:color/white"
+        app:cardCornerRadius="3dp"
+        app:cardElevation="8dp"
+        app:contentPaddingBottom="10dp">
 
-    <EditText
-        android:id="@+id/EmailID"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:autofillHints=""
-        android:ems="10"
-        android:hint="Email"
-        android:inputType="textEmailAddress" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white">
 
-    <EditText
-        android:id="@+id/PassID"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:ems="10"
-        android:hint="Password"
-        android:inputType="textPassword" />
+            <EditText
+                android:id="@+id/name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:drawableStart="@drawable/ic_account_circle_black_24dp"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:hint="Name"
+                android:inputType="textEmailAddress"
+                android:padding="10dp"
+                android:singleLine="true"
+                android:textColor="#4C4C4C"
+                android:textColorHint="@android:color/secondary_text_dark"
+                android:textSize="16sp" />
 
-    <CheckBox
-        android:id="@+id/checkBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/remember_me" />
+            <EditText
+                android:id="@+id/userEmailId"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/name"
+                android:background="@android:color/transparent"
+                android:drawableStart="@drawable/ic_mail_outline_black_24dp"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:hint="Email"
+                android:inputType="textEmailAddress"
+                android:padding="10dp"
+                android:singleLine="true"
+                android:textColor="#4C4C4C"
+                android:textColorHint="@android:color/secondary_text_dark"
+                android:textSize="16sp" />
 
-    <android.support.v7.widget.AppCompatCheckBox
-        android:id="@+id/checkBox1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text= "Show password" />
-<Button
-        android:id="@+id/btnLogin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:onClick="launchEmailList"
-        android:text="Login" />
+            <View
+                android:id="@+id/view1"
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_below="@id/userEmailId"
+                android:background="#dddddd" />
+
+            <EditText
+                android:id="@+id/password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/view1"
+                android:layout_marginTop="5dp"
+                android:background="@android:color/transparent"
+                android:drawableStart="@drawable/ic_lock_outline_black_24dp"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:padding="10dp"
+                android:singleLine="true"
+                android:textColor="#4C4C4C"
+                android:textColorHint="@android:color/secondary_text_dark"
+                android:textSize="16sp" />
+
+            <View
+                android:id="@+id/view2"
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_below="@id/password"
+                android:background="#dddddd" />
+
+            <CheckBox
+                android:id="@+id/checkBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/view2"
+                android:text="@string/remember_me"
+                android:textColor="@color/black" />
+
+            <Button
+                android:id="@+id/signUpBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/checkBox"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/button_background"
+                android:onClick="launchEmailList"
+                android:paddingBottom="5dp"
+                android:text="Login"
+                android:textColor="@android:color/white"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
 
     <ProgressBar
         android:id="@+id/progressBarmain"
