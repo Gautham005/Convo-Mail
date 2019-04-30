@@ -171,7 +171,6 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
             tsp.connectServer(user, false);
             tt.connectServer(user, false);
         }
-
         return super.onOptionsItemSelected(item);
     }
 

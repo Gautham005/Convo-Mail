@@ -455,6 +455,9 @@ public class EmailDetailView extends AppCompatActivity {
             intent.putExtra("first", "false");
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
+        } else if (id == R.id.sync1) {
+            item.setIcon(R.drawable.ic_cached_black_24dp);
+            invalidateOptionsMenu();
         } else if (id == R.id.deletebtn) {
             new RetrieveContent(this).execute(user.getUserID(), user.getPassword(), "Delete");
             FileInputStream fis = null;
@@ -544,6 +547,14 @@ public class EmailDetailView extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        invalidateOptionsMenu();
+        menu.findItem(R.id.sync1).setVisible(false);
+        menu.findItem(R.id.sync2).setVisible(true);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
     private String getFolder(String user) {
 
         if (fileName1.contains("Primary")) {
@@ -559,6 +570,7 @@ public class EmailDetailView extends AppCompatActivity {
         }
         return "";
     }
+
     @SuppressWarnings("StatementWithEmptyBody")
 
     class RetrieveContent extends AsyncTask<String, Void, String>{
