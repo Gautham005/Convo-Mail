@@ -24,7 +24,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -74,6 +73,7 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         bacserv.putExtra("Name", user.getName());
         bacserv.putExtra("username", user.getUserID());
         bacserv.putExtra("pass", user.getPassword());
+        stopService(bacserv);
         b.putStringArrayList("auth",s);
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_CONTACTS)

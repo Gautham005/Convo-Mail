@@ -81,6 +81,7 @@ public class EmailDetailView extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_email_detail_view);
         try{
+
             fileName1 = getIntent().getStringExtra("file");
             pos = getIntent().getIntExtra("position", 0);
             spinner = findViewById(R.id.progressBar2);
