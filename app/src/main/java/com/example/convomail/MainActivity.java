@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatCheckBox;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
@@ -41,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     ProgressBar spinner;
     String uname, nname, pass;
     private CheckBox checkbox;
-
+    boolean notPressed = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,16 +110,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void launchEmailList(View view) {
-        nname = name.getText().toString();
-        uname = email.getText().toString();
-        pass = password.getText().toString();
-        if (!uname.equals("") && !pass.equals("")) {
-            spinner.setVisibility(View.VISIBLE);
-            int b = AuthChecker(uname, pass);
+        if (notPressed) {
+            nname = name.getText().toString();
+            uname = email.getText().toString();
+            pass = password.getText().toString();
+            if (!uname.equals("") && !pass.equals("")) {
+                spinner.setVisibility(View.VISIBLE);
+                int b = AuthChecker(uname, pass);
 
-        } else {
-            Toast t = Toast.makeText(getApplicationContext(), "Please enter email id and password", Toast.LENGTH_LONG);
-            t.show();
+            } else {
+                Toast t = Toast.makeText(getApplicationContext(), "Please enter email id and password", Toast.LENGTH_LONG);
+                t.show();
+            }
+            notPressed = false;
         }
     }
 
@@ -128,6 +130,14 @@ public class MainActivity extends AppCompatActivity {
         Toast t = Toast.makeText(getApplicationContext(), "Invalid Credentials", Toast.LENGTH_LONG);
         t.show();
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent a = new Intent(Intent.ACTION_MAIN);
+        a.addCategory(Intent.CATEGORY_HOME);
+        a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(a);
     }
 
     public void setAuth(Boolean b) {

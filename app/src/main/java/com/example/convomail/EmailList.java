@@ -148,11 +148,29 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
             drawer.closeDrawer(GravityCompat.START);
         } else {
 
-            startService(bacserv);
-            Intent a = new Intent(Intent.ACTION_MAIN);
-            a.addCategory(Intent.CATEGORY_HOME);
-            a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(a);        }
+            AlertDialog.Builder builder = new AlertDialog.Builder(
+                    EmailList.this);
+            builder.setTitle("Confirm exit");
+            builder
+                    .setMessage("Do you want to close this application ?")
+                    .setCancelable(false)
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            startService(bacserv);
+                            Intent startMain = new Intent(Intent.ACTION_MAIN);
+                            startMain.addCategory(Intent.CATEGORY_HOME);
+                            startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(startMain);
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+        }
     }
 
     @Override
@@ -194,8 +212,44 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         int id = item.getItemId();
 
         if (id == R.id.log_out) {
-            editor.remove("name");
-            editor.apply();
+            String name1 = SharedPreferences.getString("name", "");
+            String email1 = SharedPreferences.getString("username", "");
+            String password1 = SharedPreferences.getString("password", "");
+            String nname = "", emailn = "", passwordn = "";
+            String name[] = name1.split("::");
+            String usernames[] = email1.split("::");
+            String passwords[] = password1.split("::");
+            if (name.length == 1) {
+                editor.remove("name");
+                editor.remove("username");
+                editor.remove("password");
+                editor.apply();
+            } else {
+                int j = 0;
+                for (int i = 0; i < name.length; i++) {
+                    if (usernames[i].equals(user.getUserID())) {
+                        Log.d("aa", "aa");
+                        continue;
+                    } else {
+                        if (j == 0) {
+                            j++;
+                            nname = name[i];
+                            emailn = usernames[i];
+                            passwordn = passwords[i];
+                        } else {
+                            j++;
+                            nname = nname + "::" + name[i];
+                            emailn = emailn + "::" + usernames[i];
+                            passwordn = passwordn + "::" + passwords[i];
+                        }
+                    }
+                }
+                Log.d("name", nname);
+                editor.putString("name", nname);
+                editor.putString("username", emailn);
+                editor.putString("password", passwordn);
+                editor.apply();
+            }
             try {
                 new FileOutputStream(fileName).close();
             } catch (IOException e) {

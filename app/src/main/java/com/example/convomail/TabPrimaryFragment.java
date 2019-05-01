@@ -16,7 +16,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.FileInputStream;
@@ -184,16 +183,8 @@ public class TabPrimaryFragment extends Fragment {
             adapter = new ArrayAdapter<String>(getContext(), R.layout.dataview, R.id.TextView ,header);
             list = getView().findViewById(R.id.PrimaryList);
             list.setAdapter(adapter);
-            TextView t;
             int i = 0;
-            list.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
-            for(com.example.convomail.Message m:user.getInbox().getPrimary().getMessages()){
-                if(m.read==false){
-                    t = (TextView) adapter.getView(i, null, null);
 
-                }
-                i++;
-            }
             FileOutputStream fos = getContext().openFileOutput(fileName, Context.MODE_PRIVATE);
             ObjectOutputStream os = new ObjectOutputStream(fos);
             os.writeObject(user);
