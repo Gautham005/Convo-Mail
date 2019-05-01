@@ -80,7 +80,6 @@ public class EmailDetailView extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_email_detail_view);
-
         try{
             fileName1 = getIntent().getStringExtra("file");
             pos = getIntent().getIntExtra("position", 0);
@@ -199,6 +198,21 @@ public class EmailDetailView extends AppCompatActivity {
                     s1 =fileName.get(1).split("/");
                     b2.setText(s1[s1.length-1]);
                 }
+            }
+            else{
+                m.setContent(content1, "text/plain");
+                if (fileName1.contains("Primary")) {
+                    user.inbox.getPrimary().getMessages().get(pos).setContent(content1, "text/plain");
+                } else if (fileName1.contains("Draft")) {
+                    user.inbox.getDraft().getMessages().get(pos).setContent(content1, "text/plain");
+                } else if (fileName1.contains("Spam")) {
+                    user.inbox.getSpam().getMessages().get(pos).setContent(content1, "text/plain");
+                } else if (fileName1.contains("Trash")) {
+                    user.inbox.getTrash().getMessages().get(pos).setContent(content1, "text/plain");
+                } else if (fileName1.contains("SentMail")) {
+                    user.inbox.getSentMail().getMessages().get(pos).setContent(content1, "text/plain");
+                }
+                saveToFile();
             }
 
         } else {
@@ -418,7 +432,7 @@ public class EmailDetailView extends AppCompatActivity {
         in.putExtra("msgno", m.getMsgno() + "");
         in.putExtra("subject", m.getSubject());
         in.putExtra("folder", getFolder(user.getUserID()));
-        in.putExtra("content", content.getText() + "\n\n\n" + fileName.size() + " attachments");
+        in.putExtra("content", content.getText());
         startActivity(in);
     }
     public void Reply(View view) {
@@ -472,10 +486,7 @@ public class EmailDetailView extends AppCompatActivity {
             intent.putExtra("first", "false");
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
-        } else if (id == R.id.sync1) {
-            item.setIcon(R.drawable.ic_cached_black_24dp);
-            invalidateOptionsMenu();
-        } else if (id == R.id.deletebtn) {
+        }  else if (id == R.id.deletebtn) {
             new RetrieveContent(this).execute(user.getUserID(), user.getPassword(), "Delete");
             FileInputStream fis = null;
             try {
@@ -568,7 +579,6 @@ public class EmailDetailView extends AppCompatActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         invalidateOptionsMenu();
         menu.findItem(R.id.sync1).setVisible(false);
-        menu.findItem(R.id.sync2).setVisible(true);
         return super.onPrepareOptionsMenu(menu);
     }
 

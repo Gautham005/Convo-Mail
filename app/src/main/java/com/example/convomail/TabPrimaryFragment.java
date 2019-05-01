@@ -86,6 +86,7 @@ public class TabPrimaryFragment extends Fragment {
         spinner = rootview.findViewById(R.id.progressBar1);
         setHasOptionsMenu(true);
         fileName = user.getUserID()+user.getName()+"Primary";
+
         try {
             FileInputStream fis = getContext().openFileInput(fileName);
             ObjectInputStream is = new ObjectInputStream(fis);

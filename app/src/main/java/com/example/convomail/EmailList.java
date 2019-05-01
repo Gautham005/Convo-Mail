@@ -49,6 +49,7 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
     TabDraftFragment td=new TabDraftFragment();
     TabSpamFragment tsp=new TabSpamFragment();
     TabTrashFragment tt=new TabTrashFragment();
+    Intent bacserv;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,11 +62,6 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         String username = newIntent.getStringExtra("username");
         String name = newIntent.getStringExtra("Name");
         String bo = newIntent.getStringExtra("first");
-        Intent bacserv = new Intent(this, MyService.class);
-        bacserv.putExtra("Name", name);
-        bacserv.putExtra("username", username);
-        bacserv.putExtra("pass", password);
-        startService(bacserv);
         bo = "true";
         fileName = username+password+"Primary";
         ArrayList<String> s = new ArrayList<>();
@@ -74,6 +70,10 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         s.add(password);
         user = new User(username, password, name);
         Bundle b = new Bundle();
+        bacserv = new Intent(this, MyService.class);
+        bacserv.putExtra("Name", user.getName());
+        bacserv.putExtra("username", user.getUserID());
+        bacserv.putExtra("pass", user.getPassword());
         b.putStringArrayList("auth",s);
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_CONTACTS)
@@ -147,6 +147,8 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
+
+            startService(bacserv);
             Intent a = new Intent(Intent.ACTION_MAIN);
             a.addCategory(Intent.CATEGORY_HOME);
             a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -243,6 +245,7 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
                     .setCancelable(false)
                     .setPositiveButton("Yes",new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog,int id) {
+                            startService(bacserv);
                             Intent startMain = new Intent(Intent.ACTION_MAIN);
                             startMain.addCategory(Intent.CATEGORY_HOME);
                             startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

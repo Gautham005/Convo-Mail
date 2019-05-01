@@ -75,7 +75,11 @@ public class MyService extends Service {
         user = new User(username, password, name);
         return START_STICKY;
     }
+    @Override
+    public void onDestroy(){
+        Toast.makeText(this, "Stopped ", Toast.LENGTH_SHORT).show();
 
+    }
     class MyTimerTask extends TimerTask {
 
         @Override
