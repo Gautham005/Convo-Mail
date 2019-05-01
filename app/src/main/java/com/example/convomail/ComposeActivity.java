@@ -212,9 +212,15 @@ public class ComposeActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.send) {
             SendMail("Send");
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
+            Log.d("To", to.getText().toString());
+            if(to.getText().equals("")){
+                Toast.makeText(this, "Enter a valid email id", Toast.LENGTH_SHORT).show();
+            }
+            else{
+                Intent intent = new Intent(this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            }
             return true;
         } else if (id == R.id.attach) {
             PickFile();
@@ -297,12 +303,15 @@ public class ComposeActivity extends AppCompatActivity {
     }
     public void SendMail(String inp) {
         String toAddress = to.getText().toString();
-        if (toAddress == null) {
-            return;
+        Log.d("Toaddress", toAddress);
+        if (to.getText() == null) {
+            Toast.makeText(this, "Enter a valid email id", Toast.LENGTH_SHORT).show();
         }
-        String subject1 = subject.getText().toString();
-        String messagebody = compose.getText().toString();
-        new SendMailTask(this.getApplicationContext()).execute(user.getUserID(), user.getPassword(), toAddress, subject1, messagebody, inp);
+        else {
+            String subject1 = subject.getText().toString();
+            String messagebody = compose.getText().toString();
+            new SendMailTask(this.getApplicationContext()).execute(user.getUserID(), user.getPassword(), toAddress, subject1, messagebody, inp);
+        }
 
     }
 

@@ -204,6 +204,10 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         } else if (id == R.id.add_account) {
 
         }
+        else if (id == R.id.help) {
+            Intent in = new Intent(this, Report_a_problem.class);
+            startActivity(in);
+        }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

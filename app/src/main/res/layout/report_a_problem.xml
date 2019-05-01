@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingTop="10dp">
+
+    <ImageView
+        android:id="@+id/help"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/navigation_drawer_icon_bgrnd"
+        android:src="@drawable/ic_help_outline_black_24dp"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Report a problem"
+        android:textColor="@android:color/black"
+        android:layout_marginTop="6dp"
+        android:layout_marginStart="27dp"
+        android:layout_toEndOf="@id/help"/>
+
+</RelativeLayout>

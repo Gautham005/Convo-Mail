@@ -7,18 +7,23 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/switch_account"
-            android:title="@null"
-            app:actionLayout="@layout/switch_account" />
+            app:actionLayout="@layout/switch_account"
+            android:title="@null" />
 
         <item
             android:id="@+id/add_account"
-            android:title="@null"
-            app:actionLayout="@layout/add_account" />
+            app:actionLayout="@layout/add_account"
+            android:title="@null" />
+
+        <item
+            android:id="@+id/help"
+            app:actionLayout="@layout/report_a_problem"
+            android:title="@null" />
 
         <item
             android:id="@+id/log_out"
-            android:title="@null"
-            app:actionLayout="@layout/log_out" />
+            app:actionLayout="@layout/log_out"
+            android:title="@null" />
     </group>
 
 
