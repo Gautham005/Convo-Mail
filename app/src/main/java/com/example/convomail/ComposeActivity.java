@@ -18,10 +18,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,18 +58,16 @@ public class ComposeActivity extends AppCompatActivity {
     EditText compose = null;
     User user;
     int i = 0;
-    RelativeLayout att1, att2;
-    ImageButton rm1, rm2;
-    TextView attn1, attn2, ext;
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}$", Pattern.CASE_INSENSITIVE);
+    ArrayList<Datamodel> d;
     AutoCompleteTextView to;
     String type;
     int msgno;
     private static final int PICKFILE_RESULT_CODE = 1;
     String folder;
     String repl;
-    ArrayList<String> fileNames = new ArrayList<>();
-
+    ArrayList<Datamodel> fileNames = new ArrayList<>();
+    private ListView list;
+    private CustomAdapter adapter=null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,19 +75,13 @@ public class ComposeActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         from = findViewById(R.id.from);
         newIntent = getIntent();
-        att1 = findViewById(R.id.attachment1);
-        att2 = findViewById(R.id.attachment2);
-        attn1 = findViewById(R.id.attachment_name1);
-        attn2 = findViewById(R.id.attachment_name2);
-        ext = findViewById(R.id.extraatt);
-        rm1 = findViewById(R.id.remove_attachment1);
-        rm2 = findViewById(R.id.remove_attachment2);
         String password = newIntent.getStringExtra("pass");
         String username = newIntent.getStringExtra("username");
         String name = newIntent.getStringExtra("Name");
         from.setText(username);
         to = findViewById(R.id.to);
         to.setThreshold(1);
+        list = findViewById(R.id.attachments);
         subject = findViewById(R.id.subject);
         compose = findViewById(R.id.compose);
         user = new User(username, password, name);
@@ -127,18 +121,7 @@ public class ComposeActivity extends AppCompatActivity {
         }
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        rm1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                RemoveAttachment(0);
-            }
-        });
-        rm2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                RemoveAttachment(1);
-            }
-        });
+
         addAdapterToViews();
     }
 
@@ -176,10 +159,7 @@ public class ComposeActivity extends AppCompatActivity {
         to.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, getNameEmailDetails()));
 
     }
-    public void RemoveAttachment(int i) {
-        fileNames.remove(i);
-        setAttachment();
-    }
+
     @Override
     public void onBackPressed() {
         if (to.getText() != null && subject.getText() != null && compose.getText() != null) {
@@ -277,18 +257,18 @@ public class ComposeActivity extends AppCompatActivity {
 
                     String[] s = u.getPath().split(":");
                     if (s[1].contains("/storage/emulated/0")) {
-                        if(fileNames.contains(s[1])){
+                        if(fileNames.contains(new Datamodel(s[1]))){
                             Toast.makeText(this, "Attachment already added", Toast.LENGTH_SHORT).show();
                         }
                         else{
-                            fileNames.add(s[1]);
+                            fileNames.add(new Datamodel(s[1]));
                         }
                     } else {
-                        if(fileNames.contains("/storage/emulated/0/" + s[1])){
+                        if(fileNames.contains(new Datamodel("/storage/emulated/0/" + s[1]))){
                             Toast.makeText(this, "Attachment already added", Toast.LENGTH_SHORT).show();
                         }
                         else {
-                            fileNames.add("/storage/emulated/0/" + s[1]);
+                            fileNames.add(new Datamodel("/storage/emulated/0/" + s[1]));
                         }
                     }
                     Log.d("filename", fileNames.size()+"");
@@ -297,40 +277,22 @@ public class ComposeActivity extends AppCompatActivity {
                 }
         }
     }
+
     public void setAttachment(){
-        att1.setVisibility(View.GONE);
-        att2.setVisibility(View.GONE);
-        ext.setVisibility(View.GONE);
-        if (fileNames.size() == 1) {
-            att1.setVisibility(View.VISIBLE);
-            String s[] = fileNames.get(0).split("/");
-            attn1.setText(s[s.length-1]);
-            attn1.setVisibility(View.VISIBLE);
-            i++;
-        }
-        if (fileNames.size() == 2) {
-            att1.setVisibility(View.VISIBLE);
-            String s[] = fileNames.get(0).split("/");
-            attn1.setText(s[s.length-1]);
-            attn1.setVisibility(View.VISIBLE);
-            att2.setVisibility(View.VISIBLE);
-            s = fileNames.get(1).split("/");
-            attn2.setText(s[s.length-1]);
-            attn2.setVisibility(View.VISIBLE);
-            i++;
-        } else if(fileNames.size()>2){
-            att1.setVisibility(View.VISIBLE);
-            String s[] = fileNames.get(0).split("/");
-            attn1.setText(s[s.length-1]);
-            attn1.setVisibility(View.VISIBLE);
-            att2.setVisibility(View.VISIBLE);
-            s = fileNames.get(1).split("/");
-            attn2.setText(s[s.length-1]);
-            attn2.setVisibility(View.VISIBLE);
-            String str = "And " + (fileNames.size() - 2) + "more files";
-            ext.setText(str);
-            ext.setVisibility(View.VISIBLE);
-        }
+//        d=new ArrayList<>();
+//        for(String file:fileNames){
+//            String s[] = file.split("/");
+//            d.add(new Datamodel(s[s.length-1]));
+//        }
+        adapter= new CustomAdapter(fileNames,getApplicationContext());
+        list.setAdapter(adapter);
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Log.d("String","aaa");
+            }
+        });
+
     }
     public void SendMail(String inp) {
         String toAddress = to.getText().toString();
@@ -449,6 +411,7 @@ public class ComposeActivity extends AppCompatActivity {
             try {
                 // Create a default MimeMessage object.
                 MimeMessage message = new MimeMessage(session);
+
                 if (type.equals("Compose")) {
                     message.setRecipients(Message.RecipientType.TO,
                             InternetAddress.parse(to));
@@ -470,15 +433,18 @@ public class ComposeActivity extends AppCompatActivity {
                     Multipart multipart = new MimeMultipart();
 
                     // Set text message part
-                    multipart.addBodyPart(messageBodyPart);
+                    multipart.addBodyPart(messageBodyPart,0);
                     //                        Part two is attachment
+                    int i1=1;
                     if (!fileNames.isEmpty()) {
-                        for (String filename : fileNames) {
-                            Log.d("fileName", fileNames.size()+"");
+                        for (Datamodel file : fileNames) {
+                            messageBodyPart = new MimeBodyPart();
+                            String filename = file.getFileName();
                             DataSource source = new FileDataSource(filename);
                             messageBodyPart.setDataHandler(new DataHandler(source));
                             messageBodyPart.setFileName(new File(filename).getName());
-                            multipart.addBodyPart(messageBodyPart);
+                            multipart.addBodyPart(messageBodyPart,i1);
+                            i1++;
                         }
                     }
 
@@ -528,15 +494,18 @@ public class ComposeActivity extends AppCompatActivity {
                     Multipart multipart = new MimeMultipart();
 
                     // Set text message part
-                    multipart.addBodyPart(messageBodyPart);
+                    multipart.addBodyPart(messageBodyPart,0);
                     //                        Part two is attachment
+                    int i1=1;
                     if (!fileNames.isEmpty()) {
-                        for (String filename : fileNames) {
-
+                        for (Datamodel file : fileNames) {
+                            messageBodyPart = new MimeBodyPart();
+                            String filename = file.getFileName();
                             DataSource source = new FileDataSource(filename);
                             messageBodyPart.setDataHandler(new DataHandler(source));
                             messageBodyPart.setFileName(new File(filename).getName());
-                            multipart.addBodyPart(messageBodyPart);
+                            multipart.addBodyPart(messageBodyPart,i1);
+                            i1++;
                         }
                     }
 
