@@ -68,6 +68,7 @@ public class ComposeActivity extends AppCompatActivity {
     ArrayList<Datamodel> fileNames = new ArrayList<>();
     private ListView list;
     private CustomAdapter adapter=null;
+    int count =0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -193,8 +194,8 @@ public class ComposeActivity extends AppCompatActivity {
         if (id == R.id.send) {
             SendMail("Send");
             Log.d("To", to.getText().toString());
-            if(to.getText().equals("")){
-                Toast.makeText(this, "Enter a valid email id", Toast.LENGTH_SHORT).show();
+            if(to.getText().toString().trim().length()==0||count==0){
+                return true;
             }
             else{
                 Intent intent = new Intent(this, MainActivity.class);
@@ -278,11 +279,7 @@ public class ComposeActivity extends AppCompatActivity {
     }
 
     public void setAttachment(){
-//        d=new ArrayList<>();
-//        for(String file:fileNames){
-//            String s[] = file.split("/");
-//            d.add(new Datamodel(s[s.length-1]));
-//        }
+
         adapter= new CustomAdapter(fileNames,getApplicationContext());
         list.setAdapter(adapter);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -296,7 +293,9 @@ public class ComposeActivity extends AppCompatActivity {
     public void SendMail(String inp) {
         String toAddress = to.getText().toString();
         Log.d("Toaddress", toAddress);
-        if (to.getText() == null) {
+        if(toAddress.contains(".com")&&(toAddress.contains("@")))
+            count=1;
+        if ((to.getText().toString().trim().length()==0)||(count==0)) {
             Toast.makeText(this, "Enter a valid email id", Toast.LENGTH_SHORT).show();
         }
         else {

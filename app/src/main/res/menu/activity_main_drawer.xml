@@ -24,6 +24,11 @@
             android:id="@+id/log_out"
             app:actionLayout="@layout/log_out"
             android:title="@null" />
+
+        <item
+            android:id="@+id/exit"
+            app:actionLayout="@layout/exit"
+            android:title="@null" />
     </group>
 
 

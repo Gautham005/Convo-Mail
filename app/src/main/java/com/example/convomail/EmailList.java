@@ -39,6 +39,7 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
     private TabAdapter adapter;
     private TabLayout tabLayout;
     private ViewPager viewPager;
+    AlertDialog.Builder builder;
     String[] emails = {"rahul123@gmail.com", "nsk77@gmail.com"};
     public static final String PREFS_NAME = "myPrefsFile";
     public static String fileName;
@@ -60,6 +61,11 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         String username = newIntent.getStringExtra("username");
         String name = newIntent.getStringExtra("Name");
         String bo = newIntent.getStringExtra("first");
+        Intent bacserv = new Intent(this, MyService.class);
+        bacserv.putExtra("Name", name);
+        bacserv.putExtra("username", username);
+        bacserv.putExtra("pass", password);
+        startService(bacserv);
         bo = "true";
         fileName = username+password+"Primary";
         ArrayList<String> s = new ArrayList<>();
@@ -224,11 +230,31 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
             startActivity(i);
         }
         else if (id == R.id.help) {
-            Intent intent = new Intent(this, Report_a_problem.class);
-            intent.putExtra("Name", user.getName());
-            intent.putExtra("username", user.getUserID());
-            intent.putExtra("pass", user.getPassword());
-            startActivity(intent);
+            Intent in = new Intent(this, Report_a_problem.class);
+            startActivity(in);
+        }
+
+        else if (id == R.id.exit) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(
+                    EmailList.this);
+            builder.setTitle("Confirm exit");
+            builder
+                    .setMessage("Do you want to close this application ?")
+                    .setCancelable(false)
+                    .setPositiveButton("Yes",new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,int id) {
+                            Intent startMain = new Intent(Intent.ACTION_MAIN);
+                            startMain.addCategory(Intent.CATEGORY_HOME);
+                            startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(startMain);                        }
+                    })
+                    .setNegativeButton("No",new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,int id) {
+                            dialog.cancel();
+                        }
+                    });
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);

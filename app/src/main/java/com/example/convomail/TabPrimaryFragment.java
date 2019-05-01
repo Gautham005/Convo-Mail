@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -11,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -128,7 +130,12 @@ public class TabPrimaryFragment extends Fragment {
                     startActivity(in);
                 }
             });
-
+            list.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
+            for(com.example.convomail.Message m:user1.getInbox().getPrimary().getMessages()){
+                if(m.read==false){
+                    list.setItemChecked(user1.getInbox().getPrimary().getMessages().indexOf(m), true);
+                }
+            }
 
         }catch(FileNotFoundException e){ flag = 1;
          fl = false;
@@ -176,6 +183,12 @@ public class TabPrimaryFragment extends Fragment {
             adapter = new ArrayAdapter<String>(getContext(), R.layout.dataview, R.id.TextView ,header);
             list = getView().findViewById(R.id.PrimaryList);
             list.setAdapter(adapter);
+            list.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
+            for(com.example.convomail.Message m:user.getInbox().getPrimary().getMessages()){
+                if(m.read==false){
+                    list.setItemChecked(user.getInbox().getPrimary().getMessages().indexOf(m), true);
+                }
+            }
             FileOutputStream fos = getContext().openFileOutput(fileName, Context.MODE_PRIVATE);
             ObjectOutputStream os = new ObjectOutputStream(fos);
             os.writeObject(user);

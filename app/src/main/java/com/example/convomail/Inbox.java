@@ -5,6 +5,8 @@ import android.util.Log;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import javax.mail.Flags;
+
 public class Inbox implements Serializable {
     private Mail primary;
     private Mail draft;
@@ -22,7 +24,7 @@ public class Inbox implements Serializable {
         try{
             ArrayList<Message> m = new ArrayList<>();
             for(javax.mail.Message j:message){
-                m.add(new Message(j.getFrom(), j.getReceivedDate(), j.getSubject(), j.getMessageNumber(), j.getContentType()));
+                m.add(new Message(j.getFrom(), j.getReceivedDate(), j.getSubject(), j.getMessageNumber(), j.getContentType(), j.isSet(Flags.Flag.SEEN)));
             }
             this.primary = new Mail(m);
         }catch (Exception e){

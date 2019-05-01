@@ -20,6 +20,7 @@ public class Message implements Serializable {
     ArrayList<String> attachmentFileType;
     boolean downloaded;
     int msgno;
+    boolean read=true;
 
     Message(Address fromAddress[], Date d, String s, int msgno, String contentType){
         this.fromAddress = fromAddress;
@@ -30,6 +31,17 @@ public class Message implements Serializable {
             this.subject = "(No subject)";
         }
         downloaded = false;
+    }
+    Message(Address fromAddress[], Date d, String s, int msgno, String contentType, boolean b){
+        this.fromAddress = fromAddress;
+        this.date = d;
+        this.subject = s;
+        this.contentType = contentType;
+        this.msgno = msgno;if(s==null){
+            this.subject = "(No subject)";
+        }
+        downloaded = false;
+        read = b;
     }
     int getMsgno(){
         return msgno;
