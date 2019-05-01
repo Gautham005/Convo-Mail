@@ -130,7 +130,13 @@ public class ComposeActivity extends AppCompatActivity {
         rm1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                RemoveAttachment();
+                RemoveAttachment(0);
+            }
+        });
+        rm2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                RemoveAttachment(1);
             }
         });
         addAdapterToViews();
@@ -170,15 +176,9 @@ public class ComposeActivity extends AppCompatActivity {
         to.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, getNameEmailDetails()));
 
     }
-    public void RemoveAttachment() {
-        fileNames.remove(0);
-        if (fileNames.isEmpty()) {
-            att1.setVisibility(View.GONE);
-        } else {
-            att1.setVisibility(View.VISIBLE);
-            attn1.setText(new File(fileNames.get(0)).getName());
-            attn1.setVisibility(View.VISIBLE);
-        }
+    public void RemoveAttachment(int i) {
+        fileNames.remove(i);
+        setAttachment();
     }
     @Override
     public void onBackPressed() {
@@ -277,28 +277,59 @@ public class ComposeActivity extends AppCompatActivity {
 
                     String[] s = u.getPath().split(":");
                     if (s[1].contains("/storage/emulated/0")) {
-                        fileNames.add(s[1]);
+                        if(fileNames.contains(s[1])){
+                            Toast.makeText(this, "Attachment already added", Toast.LENGTH_SHORT).show();
+                        }
+                        else{
+                            fileNames.add(s[1]);
+                        }
                     } else {
-                        fileNames.add("/storage/emulated/0/" + s[1]);
+                        if(fileNames.contains("/storage/emulated/0/" + s[1])){
+                            Toast.makeText(this, "Attachment already added", Toast.LENGTH_SHORT).show();
+                        }
+                        else {
+                            fileNames.add("/storage/emulated/0/" + s[1]);
+                        }
+                    }
+                    Log.d("filename", fileNames.size()+"");
+                    setAttachment();
 
-                    }
-                    if (fileNames.size() == 1) {
-                        att1.setVisibility(View.VISIBLE);
-                        attn1.setText(new File(FilePath).getName());
-                        attn1.setVisibility(View.VISIBLE);
-                        i++;
-                    }
-                    if (fileNames.size() == 2) {
-                        att2.setVisibility(View.VISIBLE);
-                        attn2.setText(new File(FilePath).getName());
-                        attn2.setVisibility(View.VISIBLE);
-                        i++;
-                    } else {
-                        String str = "And " + (fileNames.size() - 2) + "more files";
-                        ext.setText(str);
-                        ext.setVisibility(View.VISIBLE);
-                    }
                 }
+        }
+    }
+    public void setAttachment(){
+        att1.setVisibility(View.GONE);
+        att2.setVisibility(View.GONE);
+        ext.setVisibility(View.GONE);
+        if (fileNames.size() == 1) {
+            att1.setVisibility(View.VISIBLE);
+            String s[] = fileNames.get(0).split("/");
+            attn1.setText(s[s.length-1]);
+            attn1.setVisibility(View.VISIBLE);
+            i++;
+        }
+        if (fileNames.size() == 2) {
+            att1.setVisibility(View.VISIBLE);
+            String s[] = fileNames.get(0).split("/");
+            attn1.setText(s[s.length-1]);
+            attn1.setVisibility(View.VISIBLE);
+            att2.setVisibility(View.VISIBLE);
+            s = fileNames.get(1).split("/");
+            attn2.setText(s[s.length-1]);
+            attn2.setVisibility(View.VISIBLE);
+            i++;
+        } else if(fileNames.size()>2){
+            att1.setVisibility(View.VISIBLE);
+            String s[] = fileNames.get(0).split("/");
+            attn1.setText(s[s.length-1]);
+            attn1.setVisibility(View.VISIBLE);
+            att2.setVisibility(View.VISIBLE);
+            s = fileNames.get(1).split("/");
+            attn2.setText(s[s.length-1]);
+            attn2.setVisibility(View.VISIBLE);
+            String str = "And " + (fileNames.size() - 2) + "more files";
+            ext.setText(str);
+            ext.setVisibility(View.VISIBLE);
         }
     }
     public void SendMail(String inp) {
@@ -443,7 +474,7 @@ public class ComposeActivity extends AppCompatActivity {
                     //                        Part two is attachment
                     if (!fileNames.isEmpty()) {
                         for (String filename : fileNames) {
-
+                            Log.d("fileName", fileNames.size()+"");
                             DataSource source = new FileDataSource(filename);
                             messageBodyPart.setDataHandler(new DataHandler(source));
                             messageBodyPart.setFileName(new File(filename).getName());

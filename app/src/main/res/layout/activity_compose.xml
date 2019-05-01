@@ -72,6 +72,7 @@
         android:id="@+id/attachment1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/compose"
         android:visibility="gone">
 
         <FrameLayout
@@ -105,7 +106,7 @@
         <ImageButton
             android:id="@+id/remove_attachment1"
             android:layout_width="32dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:background="?android:attr/selectableItemBackground"
@@ -119,6 +120,7 @@
         android:id="@+id/attachment2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:layout_below="@id/attachment1"
         android:visibility="gone">
 
@@ -152,7 +154,7 @@
         <ImageButton
             android:id="@+id/remove_attachment2"
             android:layout_width="32dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:background="?android:attr/selectableItemBackground"
