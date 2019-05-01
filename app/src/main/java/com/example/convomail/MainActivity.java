@@ -8,10 +8,13 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatCheckBox;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -34,9 +37,10 @@ public class MainActivity extends AppCompatActivity {
     private CheckBox remember_me;
     private Button login;
     int auth = -1;
+    String s;
     ProgressBar spinner;
     String uname, nname, pass;
-    private AppCompatCheckBox checkbox;
+    private CheckBox checkbox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,38 +49,65 @@ public class MainActivity extends AppCompatActivity {
         Intent i = getIntent();
         spinner = findViewById(R.id.progressBarmain);
         SharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-
-        if (SharedPreferences.contains("name")) {
-            name1 = SharedPreferences.getString("name", "");
-            email1 = SharedPreferences.getString("username", "");
-            password1 = SharedPreferences.getString("password", "");
-            Intent in = new Intent(this, EmailList.class);
-            in.putExtra("Name", name1);
-            in.putExtra("username", email1);
-            in.putExtra("pass", password1);
-            in.putExtra("first", "false");
-            startActivity(in);
-        } else {
+        s = i.getStringExtra("Type");
+        if(s==null) {
+            if (SharedPreferences.contains("name")) {
+                name1 = SharedPreferences.getString("name", "");
+                email1 = SharedPreferences.getString("username", "");
+                password1 = SharedPreferences.getString("password", "");
+                String names[] = name1.split("::");
+                String usernames[] = email1.split("::");
+                String passwords[] = password1.split("::");
+                name1 = names[0];
+                email1 = usernames[0];
+                password1 = passwords[0];
+                Intent in = new Intent(this, EmailList.class);
+                in.putExtra("Name", name1);
+                in.putExtra("username", email1);
+                in.putExtra("pass", password1);
+                in.putExtra("first", "false");
+                startActivity(in);
+            } else {
+                name = findViewById(R.id.name);
+                email = findViewById(R.id.userEmailId);
+                password = findViewById(R.id.password);
+                remember_me = findViewById(R.id.checkBox);
+                login = findViewById(R.id.signUpBtn);
+                checkbox = findViewById(R.id.checkBox1);
+                checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                        if (isChecked) {
+                            // show password
+                            password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                        } else {
+                            // hide password
+                            password.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                        }
+                    }
+                });
+            }
+        }
+        else if(s.equals("Addaccount")){
             name = findViewById(R.id.name);
             email = findViewById(R.id.userEmailId);
             password = findViewById(R.id.password);
             remember_me = findViewById(R.id.checkBox);
             login = findViewById(R.id.signUpBtn);
-//            checkbox = findViewById(R.id.checkBox1);
-//            checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//                @Override
-//                public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-//                    if (isChecked) {
-//                        // show password
-//                        password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-//                    } else {
-//                        // hide password
-//                        password.setTransformationMethod(PasswordTransformationMethod.getInstance());
-//                    }
-//                }
-//            });
+            checkbox = findViewById(R.id.checkBox1);
+            checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                    if (isChecked) {
+                        // show password
+                        password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                    } else {
+                        // hide password
+                        password.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                    }
+                }
+            });
         }
-
     }
 
     public void launchEmailList(View view) {
@@ -108,11 +139,31 @@ public class MainActivity extends AppCompatActivity {
             Uri uri;
             Intent i = new Intent(this, EmailList.class);
             if (remember_me.isChecked()) {
-                android.content.SharedPreferences.Editor e = SharedPreferences.edit();
-                e.putString("name", nname);
-                e.putString("username", uname);
-                e.putString("password", pass);
-                e.apply();
+                if(s==null){
+                    android.content.SharedPreferences.Editor e = SharedPreferences.edit();
+                    e.putString("name", nname);
+                    e.putString("username", uname);
+                    e.putString("password", pass);
+                    e.apply();
+                }
+                else if(s.equals("Addaccount")){
+                    String n = SharedPreferences.getString("name","");
+                    String u = SharedPreferences.getString("username", "");
+                    String p = SharedPreferences.getString("password","");
+                    if(getPosition(u.split("::"), nname)==-1){
+                        String namenew = n + "::" + nname;
+                        String usernew = u + "::" + uname;
+                        String passnew = p + "::" + pass;
+                        android.content.SharedPreferences.Editor e = SharedPreferences.edit();
+                        e.putString("name", namenew);
+                        e.putString("username", usernew);
+                        e.putString("password", passnew);
+                        e.apply();
+                    }
+                    else{
+                        Toast.makeText(this, "This account is already added", Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
             i.putExtra("Name", nname);
             i.putExtra("username", uname);
@@ -121,7 +172,14 @@ public class MainActivity extends AppCompatActivity {
             startActivity(i);
         }
     }
-
+    public int getPosition(String[] username, String u){
+        for(int i=0;i<username.length;i++){
+            if(username[i].equals(u)){
+                return i;
+            }
+        }
+        return -1;
+    }
     public int AuthChecker(String u, String password1) {
         new AuthCheckerTask(getApplicationContext()).execute(u, password1);
         return auth;

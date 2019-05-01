@@ -53,6 +53,9 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_email_list);
         newIntent = getIntent();
+        SharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        Log.d("Emails", SharedPreferences.getString("username",""));
+        emails = SharedPreferences.getString("username","").split("::");
         String password = newIntent.getStringExtra("pass");
         String username = newIntent.getStringExtra("username");
         String name = newIntent.getStringExtra("Name");
@@ -193,16 +196,32 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
             startActivity(new Intent(this, MainActivity.class));
         } else if (id == R.id.switch_account) {
             AlertDialog.Builder builder = new AlertDialog.Builder(EmailList.this);
-            builder.setTitle("Manage your account")
+            builder.setTitle("Switch account")
                     .setItems(emails, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int position) {
-                            Toast.makeText(getApplicationContext(), "Switched to new account", Toast.LENGTH_LONG).show();
+                            String name1 = SharedPreferences.getString("name", "");
+                            String email1 = SharedPreferences.getString("username", "");
+                            String password1 = SharedPreferences.getString("password", "");
+                            String names[] = name1.split("::");
+                            String usernames[] = email1.split("::");
+                            String passwords[] = password1.split("::");
+                            name1 = names[position];
+                            email1 = usernames[position];
+                            password1 = passwords[position];
+                            Intent in = new Intent(getApplicationContext(), EmailList.class);
+                            in.putExtra("Name", name1);
+                            in.putExtra("username", email1);
+                            in.putExtra("pass", password1);
+                            in.putExtra("first", "false");
+                            startActivity(in);
                         }
                     });
             AlertDialog alertDialog = builder.create();
             alertDialog.show();
         } else if (id == R.id.add_account) {
-
+            Intent i = new Intent(this,MainActivity.class);
+            i.putExtra("Type","Addaccount");
+            startActivity(i);
         }
         else if (id == R.id.help) {
             Intent in = new Intent(this, Report_a_problem.class);

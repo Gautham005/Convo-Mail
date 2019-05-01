@@ -108,13 +108,28 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/view2"
                 android:text="@string/remember_me"
+                android:checked="true"
+                android:padding="5dp"
                 android:textColor="@color/black" />
-
+            <View
+                android:id="@+id/view3"
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_below="@id/checkBox"
+                android:background="#dddddd" />
+            <CheckBox
+                android:id="@+id/checkBox1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/checkBox"
+                android:text="Show password"
+                android:padding="5dp"
+                android:textColor="@color/black" />
             <Button
                 android:id="@+id/signUpBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/checkBox"
+                android:layout_below="@id/checkBox1"
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="15dp"
                 android:layout_marginEnd="20dp"
