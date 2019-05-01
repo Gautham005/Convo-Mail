@@ -211,7 +211,6 @@ public class ComposeActivity extends AppCompatActivity {
             if (to.getText() != null && subject.getText() != null && compose.getText() != null) {
                 SendMail("Draft");
             }
-            // Showing Alert Message
             Intent intent = new Intent(this, EmailList.class);
             intent.putExtra("Name", user.getName());
             intent.putExtra("username", user.getUserID());

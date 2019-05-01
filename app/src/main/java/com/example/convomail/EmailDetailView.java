@@ -80,6 +80,7 @@ public class EmailDetailView extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_email_detail_view);
+
         try{
             fileName1 = getIntent().getStringExtra("file");
             pos = getIntent().getIntExtra("position", 0);
@@ -184,11 +185,19 @@ public class EmailDetailView extends AppCompatActivity {
                 }
                 saveToFile();
                 b1.setVisibility(View.VISIBLE);
+                String s1[] =fileName.get(0).split("/");
+                b1.setText(s1[s1.length-1]);
                 if (fileName.size() == 2) {
                     b2.setVisibility(View.VISIBLE);
+                    s1 =fileName.get(1).split("/");
+                    b2.setText(s1[s1.length-1]);
                 } else if (fileName.size() == 3) {
                     b3.setVisibility(View.VISIBLE);
                     b2.setVisibility(View.VISIBLE);
+                    s1 =fileName.get(2).split("/");
+                    b3.setText(s1[s1.length-1]);
+                    s1 =fileName.get(1).split("/");
+                    b2.setText(s1[s1.length-1]);
                 }
             }
 
@@ -219,7 +228,7 @@ public class EmailDetailView extends AppCompatActivity {
             Context context;
             CharSequence text;
             Toast toast = Toast.makeText(getApplicationContext(), "Attachments saved to downloads folder", Toast.LENGTH_SHORT);
-
+            toast.show();
             tempfile = fileName.get(0);
             file = new File(tempfile);
             tempcont = fileContentType.get(0);
@@ -241,7 +250,7 @@ public class EmailDetailView extends AppCompatActivity {
                 intent.setDataAndType(apkURI, "application/msword");
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 startActivity(intent);
-            } else {
+            } else if(tempcont.contains("image")){
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_VIEW);
                 Uri apkURI = FileProvider.getUriForFile(
@@ -251,6 +260,9 @@ public class EmailDetailView extends AppCompatActivity {
                 intent.setDataAndType(apkURI, tempcont);
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 startActivity(intent);
+            }
+            else{
+                Toast.makeText(getApplicationContext(), "No app found to open attachment. Saved to downloads folder", Toast.LENGTH_SHORT).show();
             }
 
         } catch (Exception e) {
@@ -301,7 +313,7 @@ public class EmailDetailView extends AppCompatActivity {
                 intent.setDataAndType(apkURI, "application/msword");
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 startActivity(intent);
-            } else {
+            } else if(tempcont.contains("image")){
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_VIEW);
                 Uri apkURI = FileProvider.getUriForFile(
@@ -311,6 +323,9 @@ public class EmailDetailView extends AppCompatActivity {
                 intent.setDataAndType(apkURI, tempcont);
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 startActivity(intent);
+            }
+            else{
+                Toast.makeText(getApplicationContext(), "No app found to open attachment. Saved to downloads folder", Toast.LENGTH_SHORT).show();
             }
 
         } catch (Exception e) {
@@ -342,6 +357,7 @@ public class EmailDetailView extends AppCompatActivity {
             toast.show();
             tempfile = fileName.get(2);
             file = new File(tempfile);
+
             tempcont = fileContentType.get(2);
             Log.d("error", tempcont);
             if (tempcont.contains("APPLICATION/PDF")) {
@@ -361,7 +377,7 @@ public class EmailDetailView extends AppCompatActivity {
                 intent.setDataAndType(apkURI, "application/msword");
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 startActivity(intent);
-            } else if (tempcont.contains("image")) {
+            } else if(tempcont.contains("image")){
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_VIEW);
                 Uri apkURI = FileProvider.getUriForFile(
@@ -371,8 +387,9 @@ public class EmailDetailView extends AppCompatActivity {
                 intent.setDataAndType(apkURI, tempcont);
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 startActivity(intent);
-            } else {
-                Toast.makeText(this.getApplicationContext(), "Cannot open attachment.", Toast.LENGTH_SHORT).show();
+            }
+            else{
+                Toast.makeText(getApplicationContext(), "No app found to open attachment. Saved to downloads folder", Toast.LENGTH_SHORT).show();
             }
 
         } catch (Exception e) {

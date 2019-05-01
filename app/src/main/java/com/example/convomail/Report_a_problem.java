@@ -11,13 +11,14 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class Report_a_problem extends AppCompatActivity {
-
+    User user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report_a_problem);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        user = new User(getIntent().getStringExtra("username"), getIntent().getStringExtra("pass"),getIntent().getStringExtra("Name"));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Button send =(Button)findViewById(R.id.send);
         send.setOnClickListener(new View.OnClickListener() {
@@ -46,7 +47,11 @@ public class Report_a_problem extends AppCompatActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 // todo: goto back activity from here
-                Intent intent = new Intent(this, TabPrimaryFragment.class);
+                Intent intent = new Intent(this, EmailList.class);
+                intent.putExtra("Name", user.getName());
+                intent.putExtra("username", user.getUserID());
+                intent.putExtra("pass", user.getPassword());
+                intent.putExtra("first", "false");
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 finish();

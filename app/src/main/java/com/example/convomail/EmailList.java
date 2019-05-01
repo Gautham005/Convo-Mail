@@ -224,8 +224,11 @@ public class EmailList extends AppCompatActivity implements NavigationView.OnNav
             startActivity(i);
         }
         else if (id == R.id.help) {
-            Intent in = new Intent(this, Report_a_problem.class);
-            startActivity(in);
+            Intent intent = new Intent(this, Report_a_problem.class);
+            intent.putExtra("Name", user.getName());
+            intent.putExtra("username", user.getUserID());
+            intent.putExtra("pass", user.getPassword());
+            startActivity(intent);
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
