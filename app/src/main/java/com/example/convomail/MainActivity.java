@@ -156,12 +156,14 @@ public class MainActivity extends AppCompatActivity {
                     e.putString("username", uname);
                     e.putString("password", pass);
                     e.apply();
+                    Log.d("hihihi","dssasdsds");
+
                 }
                 else if(s.equals("Addaccount")){
                     String n = SharedPreferences.getString("name","");
                     String u = SharedPreferences.getString("username", "");
                     String p = SharedPreferences.getString("password","");
-                    if(getPosition(u.split("::"), nname)==-1){
+                    if(getPosition(u.split("::"), uname)==-1){
                         String namenew = n + "::" + nname;
                         String usernew = u + "::" + uname;
                         String passnew = p + "::" + pass;
@@ -172,10 +174,14 @@ public class MainActivity extends AppCompatActivity {
                         e.apply();
                     }
                     else{
-                        Toast.makeText(this, "This account is already added", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "This account is already added", Toast.LENGTH_LONG).show();
+                        Log.d("hihihi","dsdsds");
                     }
+
                 }
+
             }
+
             i.putExtra("Name", nname);
             i.putExtra("username", uname);
             i.putExtra("pass", pass);
