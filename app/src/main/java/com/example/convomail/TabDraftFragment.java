@@ -248,7 +248,7 @@ public class TabDraftFragment extends Fragment {
                 Session emailSession = Session.getDefaultInstance(properties);
                 // emailSession.setDebug(true);
 
-                // create the POP3 store object and connect with the pop server
+                // create the imap store object and connect with the imap server
                 Store store = emailSession.getStore("imaps");
                 store.connect(host, strings[0], strings[1]);
 
